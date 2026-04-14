@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orendina Realty — Investor Portal</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+#auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#090D1B 0%,#1A05A2 100%);padding:20px;position:fixed;inset:0;z-index:9999}
+.auth-box{background:#fff;border-radius:20px;padding:36px 32px;width:100%;max-width:400px;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+.auth-logo2{display:flex;align-items:center;gap:10px;margin-bottom:24px}
+.auth-mark2{width:38px;height:38px;background:#1A05A2;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.auth-mark2 svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.5}
+.auth-brand2 h1{font-size:16px;font-weight:700;color:#09101E;font-family:'Inter',sans-serif}
+.auth-brand2 p{font-size:10px;color:#6E7D95;text-transform:uppercase;letter-spacing:1px;font-family:'Inter',sans-serif}
+.auth-tabs2{display:flex;background:#F7F9FC;border-radius:8px;padding:3px;margin-bottom:20px}
+.auth-tab2{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:600;border-radius:6px;cursor:pointer;color:#6E7D95;transition:.15s;font-family:'Inter',sans-serif}
+.auth-tab2.active{background:#fff;color:#1A05A2;box-shadow:0 1px 3px rgba(9,16,46,.05)}
+.auth-form2{display:flex;flex-direction:column;gap:13px}
+.auth-form2.hidden{display:none}
+.afg{display:flex;flex-direction:column;gap:4px}
+.afg label{font-size:10px;font-weight:700;color:#364257;text-transform:uppercase;letter-spacing:.4px;font-family:'Inter',sans-serif}
+.afg input{padding:10px 12px;border:1.5px solid #E8EDF4;border-radius:8px;font-size:14px;color:#09101E;outline:none;transition:.15s;font-family:'Inter',sans-serif}
+.afg input:focus{border-color:#1A05A2;box-shadow:0 0 0 3px rgba(26,5,162,.07)}
+.auth-submit{background:#1A05A2;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:.15s;margin-top:4px}
+.auth-submit:hover{background:#2510C8}
+.auth-submit:disabled{opacity:.6;cursor:not-allowed}
+.auth-err2{background:#FDEAEA;color:#A51B1B;border-radius:8px;padding:10px 12px;font-size:12px;font-weight:500;display:none;font-family:'Inter',sans-serif}
+.auth-err2.show{display:block}
+.auth-ok2{background:#E8F5E8;color:#005F02;border-radius:8px;padding:10px 12px;font-size:12px;font-weight:500;display:none;font-family:'Inter',sans-serif}
+.auth-ok2.show{display:block}
+.auth-note2{font-size:11px;color:#6E7D95;text-align:center;margin-top:6px;line-height:1.6;font-family:'Inter',sans-serif}
+#main-app{display:none}
+#main-app.show{display:flex}
+</style>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#1A05A2;--blue-l:#2510C8;--blue-ll:#EEF0FD;--blue-xs:#F5F5FF;--blue-d:#110380;
+  --green:#005F02;--green-l:#007A03;--green-ll:#E8F5E8;
+  --bg:#F7F9FC;--card:#FFFFFF;--border:#E8EDF4;--border2:#CDD5E0;
+  --text:#09101E;--text2:#364257;--text3:#6E7D95;--text4:#A8B5C8;
+  --warn:#9A4B00;--warn-bg:#FEF0DC;--danger:#A51B1B;--danger-bg:#FDEAEA;
+  --sidebar:#090D1B;--sidebar-t:#5E728A;
+  --r8:8px;--r12:12px;--r16:16px;--r20:20px;
+  --s1:0 1px 3px rgba(9,16,46,.05),0 1px 2px rgba(9,16,46,.03);
+  --s2:0 4px 14px rgba(9,16,46,.08);--s3:0 12px 28px rgba(9,16,46,.12);
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-feature-settings:"tnum" 1,"lnum" 1;font-variant-numeric:tabular-nums lining-nums}
+
+/* SIDEBAR */
+.sidebar{width:224px;min-height:100vh;background:var(--sidebar);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:300;border-right:1px solid rgba(255,255,255,.04)}
+.sb-brand{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.05)}
+.sb-logo-row{display:flex;align-items:center;gap:9px}
+.sb-mark{width:30px;height:30px;border-radius:7px;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-mark svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2.5}
+.sb-brand h2{color:#fff;font-size:13.5px;font-weight:600;letter-spacing:-.2px}
+.sb-brand p{color:var(--sidebar-t);font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;margin-top:1px}
+.sb-user{padding:11px 16px;display:flex;align-items:center;gap:9px;border-bottom:1px solid rgba(255,255,255,.05)}
+.sb-av{width:30px;height:30px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;flex-shrink:0}
+.sb-uname{color:#fff;font-size:12px;font-weight:500;line-height:1.3}
+.sb-uid{color:var(--sidebar-t);font-size:10px;font-feature-settings:"tnum" 1}
+.sb-nav{flex:1;padding:7px 0;overflow-y:auto}
+.sb-sec{padding:11px 16px 3px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(94,114,138,.35);font-weight:600}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 10px 8px 16px;color:var(--sidebar-t);cursor:pointer;transition:.13s;font-size:12.5px;font-weight:500;border-left:2px solid transparent}
+.sb-item:hover{color:#fff;background:rgba(255,255,255,.04)}
+.sb-item.active{color:#fff;background:rgba(26,5,162,.22);border-left-color:var(--blue-l)}
+.sb-item svg{width:14px;height:14px;flex-shrink:0;stroke-width:1.8}
+.sb-badge{margin-left:auto;background:var(--danger);color:#fff;border-radius:20px;font-size:9px;padding:1px 6px;font-weight:700}
+.sb-foot{padding:11px 16px;border-top:1px solid rgba(255,255,255,.05)}
+.sb-foot a{color:var(--sidebar-t);font-size:11px;text-decoration:none;display:flex;align-items:center;gap:7px;transition:.13s}
+.sb-foot a:hover{color:#fff}
+
+/* MAIN */
+.main{margin-left:224px;flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 26px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:var(--s1)}
+.tb-left{display:flex;align-items:center;gap:10px}
+.tb-back{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:var(--blue);font-size:12px;font-weight:600;font-family:'Inter',sans-serif;padding:5px 0;transition:.13s;white-space:nowrap}
+.tb-back:hover{color:var(--blue-l)}
+.tb-back svg{width:14px;height:14px;stroke:currentColor;stroke-width:2}
+.tb-back.hidden{display:none}
+.tb-title{font-size:15px;font-weight:600;color:var(--text)}
+.tb-right{display:flex;align-items:center;gap:8px}
+.icon-btn{background:none;border:1px solid var(--border);border-radius:var(--r8);padding:6px 10px;cursor:pointer;font-size:13px;color:var(--text2);transition:.13s;position:relative;display:flex;align-items:center}
+.icon-btn:hover{background:var(--bg)}
+.notif-dot{position:absolute;top:5px;right:5px;width:6px;height:6px;background:var(--danger);border-radius:50%;border:1.5px solid var(--card)}
+.burger{display:none;flex-direction:column;gap:4px;cursor:pointer;background:none;border:none;padding:4px}
+.burger span{width:18px;height:1.5px;background:var(--text2);border-radius:2px;display:block}
+
+/* PAGES */
+.page{display:none;padding:26px;animation:fadeUp .15s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.ph{margin-bottom:20px}
+.ph h2{font-size:19px;font-weight:700;color:var(--text);letter-spacing:-.4px}
+.ph p{color:var(--text3);font-size:13px;margin-top:2px}
+
+/* ASSETS HEADER */
+.assets-hd{background:var(--blue);border-radius:var(--r20);padding:26px 28px 22px;color:#fff;margin-bottom:22px;position:relative;overflow:hidden}
+.assets-hd::before{content:'';position:absolute;right:-50px;top:-50px;width:200px;height:200px;background:rgba(255,255,255,.03);border-radius:50%}
+.ah-inner{position:relative;z-index:1}
+.ah-welcome{font-size:12px;opacity:.65;font-weight:400;margin-bottom:3px}
+.ah-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.9px;opacity:.55;font-weight:600;margin-bottom:5px}
+.ah-bal{font-size:36px;font-weight:700;line-height:1;margin-bottom:16px;font-feature-settings:"tnum" 1,"lnum" 1;letter-spacing:-1px}
+.ah-chips{display:flex;gap:8px;flex-wrap:wrap}
+.ah-chip{background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.1);border-radius:var(--r8);padding:7px 13px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:5px}
+.ah-chip-lbl{opacity:.6;font-size:11px}
+.ah-chip-val{font-weight:600;font-feature-settings:"tnum" 1}
+.chip-green{color:#6EE77A}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:22px}
+.sc{background:var(--card);border-radius:var(--r16);padding:15px 16px;border:1px solid var(--border);box-shadow:var(--s1)}
+.sc-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:9px}
+.sc-ico.blue{background:var(--blue-ll)}.sc-ico.green{background:var(--green-ll)}.sc-ico.gray{background:#F0F3F8}
+.sc-ico svg{width:14px;height:14px;stroke-width:1.8}
+.sc-ico.blue svg{stroke:var(--blue)}.sc-ico.green svg{stroke:var(--green)}.sc-ico.gray svg{stroke:var(--text3)}
+.sc-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.sc-val{font-size:20px;font-weight:700;color:var(--text);margin-top:2px;line-height:1;font-feature-settings:"tnum" 1,"lnum" 1;letter-spacing:-.5px}
+.sc-sub{font-size:11px;color:var(--text4);margin-top:2px}
+
+/* SECTION HEAD */
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sec-hd h3{font-size:13.5px;font-weight:700;color:var(--text)}
+.sec-link{font-size:12px;color:var(--blue);font-weight:600;cursor:pointer;border:none;background:none;padding:0;font-family:'Inter',sans-serif}
+.sec-link:hover{color:var(--blue-l)}
+
+/* ESTATE CARD */
+.estate-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:12px;margin-bottom:24px}
+.estate-card{background:var(--card);border-radius:var(--r16);border:1px solid var(--border);padding:17px;box-shadow:var(--s1);cursor:pointer;transition:.18s;position:relative}
+.estate-card:hover{box-shadow:var(--s3);transform:translateY(-2px);border-color:rgba(26,5,162,.2)}
+.ec-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.ec-ico{width:38px;height:38px;border-radius:var(--r12);background:var(--blue-ll);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ec-ico svg{width:16px;height:16px;stroke:var(--blue);stroke-width:1.8}
+.badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px}
+.b-active{background:var(--green-ll);color:var(--green)}
+.b-processing{background:var(--warn-bg);color:var(--warn)}
+.b-confirmed{background:var(--green-ll);color:var(--green)}
+.b-pending{background:var(--danger-bg);color:var(--danger)}
+.ec-name{font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:2px}
+.ec-loc{font-size:11px;color:var(--text3);margin-bottom:12px}
+.ec-divider{height:1px;background:var(--border);margin-bottom:12px}
+.ec-meta{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ec-meta .ml{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;font-weight:500}
+.ec-meta .mv{font-size:13px;font-weight:700;color:var(--text);margin-top:1px;font-feature-settings:"tnum" 1,"lnum" 1}
+.ec-arrow{position:absolute;top:50%;right:14px;transform:translateY(-50%);color:var(--text4);font-size:16px;transition:.13s}
+.estate-card:hover .ec-arrow{color:var(--blue);transform:translateY(-50%) translateX(2px)}
+
+/* PROPERTY CARD */
+.prop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:12px;margin-bottom:24px}
+.prop-card{background:var(--card);border-radius:var(--r16);border:1px solid var(--border);overflow:hidden;box-shadow:var(--s1);cursor:pointer;transition:.18s}
+.prop-card:hover{box-shadow:var(--s3);transform:translateY(-2px)}
+.pc-stripe{height:4px;background:var(--blue)}
+.pc-body{padding:17px}
+.pc-title{font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:2px}
+.pc-loc{font-size:11px;color:var(--text3);margin-bottom:12px}
+.pc-meta{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px}
+.pm-item{background:var(--bg);border-radius:var(--r8);padding:7px 9px}
+.pm-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;font-weight:500}
+.pm-val{font-size:13px;font-weight:700;color:var(--text);margin-top:1px;font-feature-settings:"tnum" 1,"lnum" 1}
+
+/* OPPORTUNITY CARD */
+.opp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:12px}
+.opp-card{background:var(--card);border-radius:var(--r16);border:1px solid var(--border);overflow:hidden;box-shadow:var(--s1);cursor:pointer;transition:.18s}
+.opp-card:hover{box-shadow:var(--s3);transform:translateY(-2px)}
+.opp-hd{background:var(--blue);padding:17px;color:#fff}
+.opp-hd.agri{background:#2d4a1e}
+.opp-hd h3{font-size:13.5px;font-weight:700;margin-bottom:2px}
+.opp-hd p{font-size:11px;opacity:.7}
+.opp-tag{display:inline-block;background:rgba(255,255,255,.14);border-radius:6px;font-size:9px;padding:2px 8px;margin-top:7px;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+.opp-body{padding:15px}
+.prog-wrap{margin-bottom:12px}
+.prog-top{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:500}
+.prog-bar{height:4px;background:var(--border);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;background:var(--blue)}
+.btn-invest{width:100%;background:var(--blue);color:#fff;border:none;border-radius:var(--r8);padding:10px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.13s;font-family:'Inter',sans-serif}
+.btn-invest:hover{background:var(--blue-l)}
+.btn-invest.buy{background:var(--blue)}.btn-invest.buy:hover{background:var(--blue-l)}
+.btn-invest.agri{background:#3d6a2a}.btn-invest.agri:hover{background:#4a7d35}
+
+/* OPP DETAIL */
+.opp-detail-hd{background:var(--blue);border-radius:var(--r16);padding:24px;color:#fff;margin-bottom:18px}
+.opp-detail-hd.agri{background:#2d4a1e}
+.odh-tag{font-size:10px;text-transform:uppercase;letter-spacing:.7px;opacity:.6;font-weight:600;margin-bottom:5px}
+.odh-name{font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:2px}
+.odh-loc{font-size:12px;opacity:.65;margin-bottom:14px}
+.opp-detail-desc{background:var(--card);border:1px solid var(--border);border-radius:var(--r12);padding:16px;margin-bottom:18px;box-shadow:var(--s1)}
+.opp-detail-desc h4{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.opp-detail-desc p{font-size:13px;color:var(--text2);line-height:1.65}
+
+/* DETAIL HEADER */
+.detail-hd{background:var(--blue);border-radius:var(--r16);padding:22px 24px;color:#fff;margin-bottom:18px}
+.dh-tag{font-size:10px;text-transform:uppercase;letter-spacing:.7px;opacity:.6;font-weight:600;margin-bottom:5px}
+.dh-name{font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:2px}
+.dh-loc{font-size:12px;opacity:.65;margin-bottom:14px}
+.dh-stats{display:flex;gap:18px;flex-wrap:wrap}
+.dh-s .dsl{font-size:10px;opacity:.55;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.dh-s .dsv{font-size:17px;font-weight:700;margin-top:1px;font-feature-settings:"tnum" 1,"lnum" 1}
+
+/* INVESTMENT ENTRIES */
+.entry-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.entry-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r16);padding:16px;box-shadow:var(--s1)}
+.entry-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.entry-date{font-size:12px;color:var(--text3);font-weight:500}
+.entry-pct{background:var(--blue-ll);color:var(--blue);font-size:12px;font-weight:700;padding:3px 11px;border-radius:20px;font-feature-settings:"tnum" 1}
+.entry-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.em-item .eml{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;font-weight:500}
+.em-item .emv{font-size:13px;font-weight:700;color:var(--text);margin-top:1px;font-feature-settings:"tnum" 1,"lnum" 1}
+.entry-actions{display:flex;gap:8px;flex-wrap:wrap}
+.tooltip-wrap{display:inline-flex;align-items:center;gap:5px;cursor:help;position:relative}
+.tooltip-wrap .tt{position:absolute;bottom:calc(100%+7px);left:0;background:#09101E;color:#fff;font-size:11px;padding:8px 12px;border-radius:var(--r8);max-width:260px;line-height:1.5;opacity:0;pointer-events:none;transition:.14s;z-index:50;white-space:normal}
+.tooltip-wrap:hover .tt{opacity:1}
+.info-ico{width:14px;height:14px;border-radius:50%;background:var(--blue-ll);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--blue);flex-shrink:0}
+
+/* DOCUMENTS */
+.doc-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.doc-type-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r16);padding:20px;box-shadow:var(--s1);cursor:pointer;transition:.18s;text-align:center}
+.doc-type-card:hover{box-shadow:var(--s3);transform:translateY(-2px);border-color:rgba(26,5,162,.2)}
+.dtc-ico{width:48px;height:48px;border-radius:var(--r12);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:22px}
+.dtc-ico.blue{background:var(--blue-ll)}.dtc-ico.green{background:var(--green-ll)}
+.dtc-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px}
+.dtc-count{font-size:12px;color:var(--text3)}
+.doc-list-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r16);box-shadow:var(--s1);overflow:hidden;margin-bottom:10px;cursor:pointer;transition:.18s}
+.doc-list-card:hover{box-shadow:var(--s2);border-color:rgba(26,5,162,.2)}
+.doc-list-inner{padding:14px 17px;display:flex;align-items:center;gap:13px}
+.dli-ico{width:36px;height:36px;border-radius:9px;background:var(--blue-ll);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dli-ico svg{width:15px;height:15px;stroke:var(--blue);stroke-width:1.8}
+.dli-ico.green{background:var(--green-ll)}
+.dli-ico.green svg{stroke:var(--green)}
+.dli-name{font-size:13px;font-weight:700;color:var(--text);flex:1}
+.dli-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.dli-arr{color:var(--text4);font-size:15px;flex-shrink:0;transition:.13s}
+.doc-list-card:hover .dli-arr{color:var(--blue)}
+.doc-sec-lbl{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;padding:14px 0 8px;border-bottom:1px solid var(--border);margin-bottom:10px}
+.doc-file-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.doc-file-row{background:var(--card);border:1px solid var(--border);border-radius:var(--r12);padding:13px 15px;display:flex;align-items:center;gap:12px;box-shadow:var(--s1);transition:.13s}
+.doc-file-row:hover{box-shadow:var(--s2)}
+.doc-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
+.di-blue{background:var(--blue-ll)}.di-green{background:var(--green-ll)}.di-gray{background:#F0F3F8}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:13px;font-weight:600;color:var(--text)}
+.doc-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.doc-btns{display:flex;gap:6px;flex-shrink:0}
+.btn-sm{border:none;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:.13s;white-space:nowrap}
+.btn-v{background:var(--blue-ll);color:var(--blue)}.btn-v:hover{background:#DDE0FB}
+.btn-d{background:var(--green);color:#fff}.btn-d:hover{background:var(--green-l)}
+.btn-p{background:var(--bg);color:var(--text3);border:1px dashed var(--border2)}
+
+/* PAYMENTS */
+.pay-ctx-banner{background:var(--blue-ll);border:1px solid rgba(26,5,162,.1);border-radius:var(--r12);padding:11px 15px;font-size:12px;color:var(--blue);margin-bottom:14px;display:flex;align-items:center;gap:7px;font-weight:500}
+.pay-summary{display:flex;gap:18px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:var(--r12);padding:13px 17px;margin-bottom:16px;box-shadow:var(--s1)}
+.ps-item{font-size:12.5px;color:var(--text2)}
+.ps-item strong{color:var(--text);font-weight:700;font-feature-settings:"tnum" 1}
+.table-wrap{background:var(--card);border-radius:var(--r16);border:1px solid var(--border);overflow-x:auto;box-shadow:var(--s1)}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 15px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);background:#FAFBFD;white-space:nowrap}
+td{padding:12px 15px;font-size:13px;color:var(--text);border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFBFD}
+.tc{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px}
+.tc-inv{background:var(--blue-ll);color:var(--blue)}
+.tc-prop{background:var(--green-ll);color:var(--green)}
+.mono{font-feature-settings:"tnum" 1,"lnum" 1;font-size:12px;color:var(--text3)}
+.amount-cell{font-weight:700;font-feature-settings:"tnum" 1,"lnum" 1;letter-spacing:-.2px}
+.pay-method{font-size:11px;color:var(--text3);font-style:italic}
+
+/* NOTIFICATIONS */
+.notif-list{display:flex;flex-direction:column;gap:9px;max-width:640px}
+.notif-item{background:var(--card);border:1px solid var(--border);border-radius:var(--r16);padding:15px;display:flex;gap:12px;box-shadow:var(--s1);cursor:pointer;transition:.13s}
+.notif-item:hover{box-shadow:var(--s2)}
+.notif-item.unread{border-left:3px solid var(--blue)}
+.notif-item.read{opacity:.72}
+.ni-ico{width:35px;height:35px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.ni-blue{background:var(--blue-ll)}.ni-green{background:var(--green-ll)}.ni-warn{background:var(--warn-bg)}
+.ni-body{flex:1}
+.ni-title{font-size:13px;font-weight:700;color:var(--text)}
+.ni-desc{font-size:12px;color:var(--text2);margin-top:2px;line-height:1.55}
+.ni-time{font-size:10px;color:var(--text3);margin-top:4px}
+.unread-dot{width:7px;height:7px;background:var(--blue);border-radius:50%;flex-shrink:0;margin-top:4px}
+
+/* PROFILE */
+.profile-layout{display:grid;grid-template-columns:195px 1fr;gap:16px}
+.profile-side{background:var(--card);border:1px solid var(--border);border-radius:var(--r16);padding:20px;box-shadow:var(--s1);text-align:center}
+.pav{width:60px;height:60px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:800;margin:0 auto 11px}
+.pname{font-size:14px;font-weight:700;color:var(--text)}
+.pid{font-size:10px;color:var(--text3);margin-top:2px;font-feature-settings:"tnum" 1}
+.p-div{height:1px;background:var(--border);margin:13px 0}
+.p-stats{display:flex;justify-content:space-around}
+.ps-s .n{font-size:16px;font-weight:700;color:var(--text);font-feature-settings:"tnum" 1}
+.ps-s .l{font-size:9.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.3px}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r16);padding:19px;box-shadow:var(--s1);margin-bottom:12px}
+.form-card h3{font-size:13px;font-weight:700;color:var(--text);margin-bottom:13px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px}
+.fg input{padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--r8);font-size:13px;color:var(--text);background:var(--card);outline:none;transition:.13s;font-family:'Inter',sans-serif;font-feature-settings:"tnum" 1}
+.fg input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,5,162,.07)}
+.btn-primary{background:var(--blue);color:#fff;border:none;border-radius:var(--r8);padding:9px 18px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.13s;font-family:'Inter',sans-serif}
+.btn-primary:hover{background:var(--blue-l)}
+.btn-ghost{background:none;color:var(--blue);border:1.5px solid var(--blue-ll);border-radius:var(--r8);padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;transition:.13s;font-family:'Inter',sans-serif}
+.btn-ghost:hover{background:var(--blue-ll)}
+
+/* EMPTY */
+.empty{text-align:center;padding:32px 20px;color:var(--text3)}
+.empty svg{width:32px;height:32px;stroke:var(--border2);margin-bottom:8px;stroke-width:1.5}
+.empty p{font-size:12.5px}
+
+/* MOBILE */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:299}
+.overlay.open{display:block}
+@media(max-width:820px){
+  .sidebar{transform:translateX(-100%);transition:.25s}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}.burger{display:flex}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .profile-layout{grid-template-columns:1fr}
+  .doc-type-grid{grid-template-columns:1fr 1fr}
+  .page{padding:15px}.topbar{padding:0 15px}
+  .entry-meta{grid-template-columns:1fr 1fr}
+}
+@media(max-width:420px){
+  .stats-row{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}
+  .dh-stats{flex-direction:column;gap:10px}.doc-type-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body style="overflow:hidden">
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo2">
+      <div class="auth-mark2"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
+      <div class="auth-brand2"><h1>Orendina Realty</h1><p>Investor Portal</p></div>
+    </div>
+    <div class="auth-tabs2">
+      <div class="auth-tab2 active" id="atab-login" onclick="aSwitch('login')">Sign In</div>
+      <div class="auth-tab2" id="atab-signup" onclick="aSwitch('signup')">Create Account</div>
+    </div>
+    <!-- LOGIN -->
+    <div class="auth-form2" id="aform-login">
+      <div class="auth-err2" id="aerr-login"></div>
+      <div class="afg"><label>Email Address</label><input type="email" id="ain-email" placeholder="your@email.com"></div>
+      <div class="afg"><label>Password</label><input type="password" id="ain-pass" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="auth-submit" id="abtn-login" onclick="doLogin()">Sign In to My Portal</button>
+      <div class="auth-note2">Your investments, documents and payments are securely stored.</div>
+    </div>
+    <!-- SIGNUP -->
+    <div class="auth-form2 hidden" id="aform-signup">
+      <div class="auth-err2" id="aerr-signup"></div>
+      <div class="auth-ok2" id="aok-signup"></div>
+      <div class="afg"><label>Full Name</label><input type="text" id="ain-name" placeholder="e.g. Emeka Okonkwo"></div>
+      <div class="afg"><label>Phone Number</label><input type="tel" id="ain-phone" placeholder="08012345678"></div>
+      <div class="afg"><label>Email Address</label><input type="email" id="ain-semail" placeholder="your@email.com"></div>
+      <div class="afg"><label>Password (min 6 characters)</label><input type="password" id="ain-spass" placeholder="Create a password"></div>
+      <button class="auth-submit" id="abtn-signup" onclick="doSignup()">Create My Account</button>
+      <div class="auth-note2">Check your email to confirm your account before signing in.</div>
+    </div>
+  </div>
+</div>
+
+<div id="main-app">
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo-row">
+      <div class="sb-mark"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
+      <div><h2>Orendina Realty</h2><p>Investor Portal</p></div>
+    </div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-av" id="sb-av">?</div>
+    <div><div class="sb-uname" id="sb-uname">Loading...</div><div class="sb-uid" id="sb-uid">—</div></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">Main</div>
+    <div class="sb-item active" data-page="home" onclick="navTo('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Home</div>
+    <div class="sb-item" data-page="investments" onclick="navTo('investments',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>My Investments</div>
+    <div class="sb-item" data-page="properties" onclick="navTo('properties',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>My Properties</div>
+    <div class="sb-item" data-page="documents" onclick="navTo('documents',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>Documents</div>
+    <div class="sb-item" data-page="payments" onclick="navTo('payments',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payments</div>
+    <div class="sb-sec">Explore</div>
+    <div class="sb-item" data-page="opportunities" onclick="navTo('opportunities',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Opportunities</div>
+    <div class="sb-item" data-page="notifications" onclick="navTo('notifications',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Notifications<span class="sb-badge" id="sb-badge">3</span></div>
+    <div class="sb-sec">Account</div>
+    <div class="sb-item" data-page="profile" onclick="navTo('profile',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</div>
+  </nav>
+  <div class="sb-foot">
+    <a href="https://wa.me/2348000000000" target="_blank">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      WhatsApp Support
+    </a>
+    <button onclick="doSignout()" style="background:none;border:none;color:#5E728A;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:.13s;font-family:'Inter',sans-serif;padding:4px 0;margin-top:4px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#5E728A'">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="tb-left">
+      <button class="burger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+      <button class="tb-back hidden" id="tb-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none"><polyline points="15 18 9 12 15 6"/></svg>Back</button>
+      <span class="tb-title" id="tb-title">Home</span>
+    </div>
+    <div class="tb-right">
+      <button class="icon-btn" onclick="navTo('notifications',null)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="notif-dot" id="notif-dot"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+    <div class="assets-hd"><div class="ah-inner">
+      <div class="ah-welcome" id="home-welcome">Welcome back</div>
+      <div class="ah-lbl">Total Assets Value</div>
+      <div class="ah-bal num" id="home-total-bal">₦0</div>
+      <div class="ah-chips" id="home-chips"></div>
+    </div></div>
+    <div class="stats-row" id="home-stats"></div>
+    <div class="sec-hd"><h3>My Investments</h3><button class="sec-link" onclick="navTo('investments',null)">View all →</button></div>
+    <div class="estate-grid" id="home-inv-grid"></div>
+    <div class="sec-hd"><h3>My Properties</h3><button class="sec-link" onclick="navTo('properties',null)">View all →</button></div>
+    <div class="prop-grid" id="home-prop-grid"></div>
+    <div class="sec-hd"><h3>Opportunities</h3><button class="sec-link" onclick="navTo('opportunities',null)">View all →</button></div>
+    <div class="opp-grid" id="home-opp-grid"></div>
+
+    <!-- TRUST & SECURITY SECTION -->
+    <div style="margin-top:8px;margin-bottom:28px">
+      <div class="sec-hd" style="margin-bottom:14px"><h3>Your Assets & Security</h3></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r16);padding:16px 18px;box-shadow:var(--s1);display:flex;align-items:flex-start;gap:12px">
+          <div style="width:36px;height:36px;border-radius:9px;background:var(--blue-ll);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A05A2" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px">Your Documents</div>
+            <div style="font-size:11px;color:var(--text3);line-height:1.5">All your deeds, certificates and agreements are stored securely and available for download at any time.</div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r16);padding:16px 18px;box-shadow:var(--s1);display:flex;align-items:flex-start;gap:12px">
+          <div style="width:36px;height:36px;border-radius:9px;background:var(--blue-ll);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A05A2" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px">Your Investments</div>
+            <div style="font-size:11px;color:var(--text3);line-height:1.5">Every fractional plot investment is recorded, documented and tied to your investor ID for full traceability.</div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r16);padding:16px 18px;box-shadow:var(--s1);display:flex;align-items:flex-start;gap:12px">
+          <div style="width:36px;height:36px;border-radius:9px;background:var(--green-ll);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#005F02" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px">Your Assets</div>
+            <div style="font-size:11px;color:var(--text3);line-height:1.5">Properties and investments are registered under your name. Assign beneficiaries to protect your estate.</div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r16);padding:16px 18px;box-shadow:var(--s1);display:flex;align-items:flex-start;gap:12px">
+          <div style="width:36px;height:36px;border-radius:9px;background:var(--green-ll);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#005F02" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px">Security</div>
+            <div style="font-size:11px;color:var(--text3);line-height:1.5">Your portal is protected with secure login. Documents are encrypted and only accessible to you.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MY INVESTMENTS -->
+  <div class="page" id="page-investments">
+    <div class="ph"><h2>My Investments</h2><p>Fractional plot positions grouped by estate</p></div>
+    <div class="stats-row" id="inv-stats"></div>
+    <div class="estate-grid" id="inv-grid"></div>
+  </div>
+
+  <!-- ESTATE DETAIL -->
+  <div class="page" id="page-estate-detail">
+    <div class="detail-hd" id="estate-dh"></div>
+    <div style="margin-bottom:16px" class="tooltip-wrap">
+      <span style="font-size:13px;font-weight:600;color:var(--text)">Investments in this Estate</span>
+      <div class="info-ico">?</div>
+      <div class="tt">Each investment is a fraction of a single plot. Min 10%, max 50% per investment.</div>
+    </div>
+    <div class="entry-list" id="estate-entries"></div>
+  </div>
+
+  <!-- MY PROPERTIES -->
+  <div class="page" id="page-properties">
+    <div class="ph"><h2>My Properties</h2><p>Full plot acquisitions and land purchases</p></div>
+    <div class="prop-grid" id="prop-grid"></div>
+  </div>
+
+  <!-- PROPERTY DETAIL -->
+  <div class="page" id="page-prop-detail">
+    <div class="detail-hd" id="prop-dh"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+      <button class="btn-primary" id="prop-doc-btn">View Documents</button>
+      <button class="btn-ghost" id="prop-pay-btn">View Payments</button>
+    </div>
+  </div>
+
+  <!-- OPPORTUNITIES -->
+  <div class="page" id="page-opportunities">
+    <div class="ph"><h2>Opportunities</h2><p>Available investments and properties open to investors</p></div>
+    <div class="sec-hd" style="margin-bottom:12px">
+      <h3>Investment Opportunities</h3>
+      <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--blue-ll);color:var(--blue)">Invest Now</span>
+    </div>
+    <div class="opp-grid" id="opp-inv-grid" style="margin-bottom:28px"></div>
+    <div class="sec-hd" style="margin-bottom:12px">
+      <h3>Property Opportunities</h3>
+      <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--green-ll);color:var(--green)">Buy Now</span>
+    </div>
+    <div class="opp-grid" id="opp-prop-grid" style="margin-bottom:28px"></div>
+  </div>
+
+  <!-- OPP DETAIL -->
+  <div class="page" id="page-opp-detail">
+    <div class="opp-detail-hd" id="opp-dh"></div>
+    <div class="pc-meta" id="opp-dmeta" style="margin-bottom:16px"></div>
+    <div class="opp-detail-desc" id="opp-ddesc"></div>
+    <div id="opp-dbtn"></div>
+  </div>
+
+  <!-- DOCUMENTS L1 -->
+  <div class="page" id="page-documents">
+    <div class="ph"><h2>Documents</h2><p>Select a category</p></div>
+    <div class="doc-type-grid">
+      <div class="doc-type-card" onclick="push('doc-l2-inv');renderDocL2('investments')">
+        <div class="dtc-ico blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A05A2" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="dtc-name">Investments</div>
+        <div class="dtc-count" id="doc-inv-count">— documents</div>
+      </div>
+      <div class="doc-type-card" onclick="push('doc-l2-prop');renderDocL2('properties')">
+        <div class="dtc-ico green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#005F02" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+        <div class="dtc-name">Properties</div>
+        <div class="dtc-count" id="doc-prop-count">— documents</div>
+      </div>
+    </div>
+    <div style="background:var(--blue-ll);border:1px solid rgba(26,5,162,.1);border-radius:var(--r12);padding:10px 15px;font-size:12px;color:var(--blue);display:flex;align-items:center;gap:7px;font-weight:500">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      Documents uploaded within 3 working days of acquisition.
+    </div>
+  </div>
+
+  <!-- DOC L2 (estate list) -->
+  <div class="page" id="page-doc-l2">
+    <div class="ph" id="doc-l2-ph"><h2></h2><p></p></div>
+    <div id="doc-l2-list"></div>
+  </div>
+
+  <!-- DOC L3 (investment list inside estate) -->
+  <div class="page" id="page-doc-l3">
+    <div class="ph" id="doc-l3-ph"><h2></h2><p></p></div>
+    <div id="doc-l3-list"></div>
+  </div>
+
+  <!-- DOC L4 (files) -->
+  <div class="page" id="page-doc-l4">
+    <div class="ph" id="doc-l4-ph"><h2></h2><p></p></div>
+    <div id="doc-l4-list"></div>
+  </div>
+
+  <!-- PAYMENTS -->
+  <div class="page" id="page-payments">
+    <div class="ph" id="pay-ph"><h2>Payments</h2><p></p></div>
+    <div class="pay-ctx-banner hidden" id="pay-ctx"></div>
+    <div class="pay-summary" id="pay-summary"></div>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Reference</th><th>Status</th></tr></thead><tbody id="pay-tbody"></tbody></table></div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div class="page" id="page-notifications">
+    <div class="ph" style="display:flex;align-items:flex-start;justify-content:space-between">
+      <div><h2>Notifications</h2><p>Tap any notification to go to the relevant section</p></div>
+      <button onclick="goBack()" style="background:none;border:1px solid var(--border);border-radius:var(--r8);padding:6px 12px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;margin-top:4px">✕ Close</button>
+    </div>
+    <div class="notif-list" id="notif-list"></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="page" id="page-profile">
+    <div class="ph"><h2>Profile</h2><p>Personal details and KYC information</p></div>
+    <div class="profile-layout">
+      <div>
+        <div class="profile-side">
+          <div class="pav" id="prof-av">?</div>
+          <div class="pname" id="prof-name">—</div>
+          <div class="pid" id="prof-id">—</div>
+          <div class="p-div"></div>
+          <div class="p-stats">
+            <div class="ps-s"><div class="n" id="profile-inv-count">0</div><div class="l">Investments</div></div>
+            <div class="ps-s"><div class="n" id="profile-prop-count">0</div><div class="l">Properties</div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="form-card">
+          <h3>Personal Information</h3>
+          <div class="form-row">
+            <div class="fg"><label>First Name</label><input id="pf-fname" value=""></div>
+            <div class="fg"><label>Last Name</label><input id="pf-lname" value=""></div>
+            <div class="fg"><label>Phone</label><input id="pf-phone" value=""></div>
+            <div class="fg"><label>Email</label><input id="pf-email" type="email" value="" readonly style="opacity:.6"></div>
+            <div class="fg"><label>NIN (National ID Number)</label><input id="pf-nin" placeholder="Enter your NIN" maxlength="11"></div>
+            <div class="fg"><label>Address</label><input id="pf-address" value=""></div>
+          </div>
+          <button class="btn-primary" style="margin-top:13px" onclick="saveProfile()">Save Changes</button>
+        </div>
+        <div class="form-card">
+          <h3>Next of Kin / Asset Beneficiary</h3>
+          <div class="form-row">
+            <div class="fg"><label>Full Name</label><input id="pf-kname" placeholder="Full name"></div>
+            <div class="fg"><label>Relationship</label><input id="pf-krel" placeholder="e.g. Spouse"></div>
+            <div class="fg"><label>Phone</label><input id="pf-kphone" placeholder="+234..."></div>
+            <div class="fg"><label>Email</label><input id="pf-kemail" type="email" placeholder="email@example.com"></div>
+            <div class="fg"><label>NIN (National ID Number)</label><input id="pf-knin" placeholder="Next of kin NIN" maxlength="11"></div>
+          </div>
+          <button class="btn-primary" style="margin-top:13px" onclick="saveProfile()">Save Beneficiary</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══ DATA ═══════════════════════════════════════════════
+// Each investment has its own payments array — NEVER merged
+const ESTATES = [
+  { id:'fortune-city', name:'Fortune City Estate', loc:'Ibadan, Oyo State', status:'Active',
+    investments:[
+      { id:'fc-i1', date:'Jan 2025', pct:20, amount:200000, plotPrice:1000000,
+        payments:[
+          {date:'20 Jan 2025',amount:200000,method:'Bank Transfer',ref:'PSK-FC1-20250120',status:'Confirmed'}
+        ],
+        docs:[
+          {name:'Certificate of Land Banking',date:'20 Jan 2025',ready:true},
+          {name:'Land Investment Agreement',date:'20 Jan 2025',ready:true},
+          {name:'Declaration of Trust',date:'20 Jan 2025',ready:true},
+          {name:'Receipt',date:'20 Jan 2025',ready:true}
+        ]
+      },
+      { id:'fc-i2', date:'Feb 2025', pct:30, amount:300000, plotPrice:1000000,
+        payments:[
+          {date:'14 Feb 2025',amount:150000,method:'Bank Transfer',ref:'PSK-FC2-20250214A',status:'Confirmed'},
+          {date:'28 Feb 2025',amount:150000,method:'Online Transfer',ref:'PSK-FC2-20250228B',status:'Confirmed'}
+        ],
+        docs:[
+          {name:'Certificate of Land Banking',date:'01 Mar 2025',ready:true},
+          {name:'Receipt',date:'28 Feb 2025',ready:true}
+        ]
+      },
+      { id:'fc-i3', date:'Mar 2025', pct:50, amount:500000, plotPrice:1000000,
+        payments:[
+          {date:'15 Mar 2025',amount:500000,method:'Bank Transfer',ref:'PSK-FC3-20250315',status:'Confirmed'}
+        ],
+        docs:[
+          {name:'Certificate of Land Banking',date:'Processing',ready:false},
+          {name:'Receipt',date:'15 Mar 2025',ready:true}
+        ]
+      }
+    ]
+  },
+  { id:'ido-phase2', name:'Ido Estate Phase 2', loc:'Ido, Oyo State', status:'Processing',
+    investments:[
+      { id:'ido-i1', date:'Apr 2025', pct:10, amount:200000, plotPrice:2000000,
+        payments:[
+          {date:'05 Apr 2025',amount:200000,method:'Bank Transfer',ref:'PSK-IDO-20250405',status:'Processing'}
+        ],
+        docs:[
+          {name:'Certificate of Land Banking',date:'Processing',ready:false},
+          {name:'Receipt',date:'05 Apr 2025',ready:true}
+        ]
+      }
+    ]
+  }
+];
+
+const PROPERTIES = [
+  { id:'medichi', name:'Medichi Estate', loc:'Ibadan, Oyo State', plots:1, amount:500000, date:'Mar 2025', size:'648 sqm', status:'Active',
+    payments:[
+      {date:'10 Mar 2025',amount:500000,method:'Bank Transfer',ref:'PSK-MC-20250310',status:'Confirmed'}
+    ],
+    docs:[
+      {name:'Deed of Assignment',date:'15 Mar 2025',ready:true},
+      {name:'Survey Plan',date:'15 Mar 2025',ready:true},
+      {name:'Receipt',date:'10 Mar 2025',ready:true},
+      {name:'Certificate of Occupancy',date:'Processing',ready:false}
+    ]
+  }
+];
+
+const OPPS = [
+  { id:'opp-fc', name:'Fortune City Estate', loc:'Ibadan, Oyo State', type:'Investment', tag:'Fractional Plot Investment',
+    price:'₦200,000', priceLabel:'per fractional unit', min:'10%', avail:'20 units left', sold:80,
+    desc:'Fortune City Estate is a premium fractional land banking scheme in Ibadan. Minimum 10% of a plot with full documentation within 3 working days.',
+    btn:'Invest Now', agri:false },
+  { id:'opp-urban', name:'Urban Planet Estate', loc:'Ibadan, Oyo State', type:'Investment', tag:'Fractional Plot Investment',
+    price:'₦150,000', priceLabel:'per fractional unit', min:'10%', avail:'Available', sold:58,
+    desc:'Affordable fractional plot investment in a fast-growing zone of Ibadan. Minimum entry 10% of a plot with full documentation.',
+    btn:'Invest Now', agri:false },
+  { id:'opp-moniya', name:'Moniya Garden Estate', loc:'Moniya, Ibadan', type:'Property', tag:'Full Plot Purchase',
+    price:'₦1,500,000', priceLabel:'per full plot', min:'—', avail:'18 plots left', sold:32,
+    desc:'Full plot purchases with Certificate of Occupancy. Fast-developing area with road access and perimeter fencing.',
+    btn:'Buy Now', agri:false },
+  { id:'opp-ido1', name:'Ido Estate Phase 1', loc:'Ido, Oyo State', type:'Property', tag:'Full Plot Purchase',
+    price:'₦900,000', priceLabel:'per full plot', min:'—', avail:'6 plots left', sold:88,
+    desc:'Ido Estate Phase 1 is a residential land development in Ido, Oyo State. Plots come with a registered deed of assignment. Very limited availability remaining.',
+    btn:'Buy Now', agri:false },
+  { id:'opp-agri', name:'Agricultural Real Estate', loc:'Oyo State', type:'Investment', tag:'Coming 2027',
+    price:'TBA', priceLabel:'', min:'—', avail:'Register Interest', sold:0,
+    desc:'Orendina Realty is expanding into agricultural real estate in 2027. Register for priority access.',
+    btn:'Register Interest', agri:true }
+];
+
+
+// ══ HELPERS ════════════════════════════════════════════
+const fmt = n => '₦' + Number(n).toLocaleString('en-NG');
+const empty = msg => `<div class="empty"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><p>${msg}</p></div>`;
+
+// Calculated totals from data (never static)
+function calcInvTotal(){ return ESTATES.reduce((s,e)=>s+e.investments.reduce((ss,i)=>ss+i.amount,0),0) }
+function calcPropTotal(){ return PROPERTIES.reduce((s,p)=>s+p.amount,0) }
+function calcTotal(){ return calcInvTotal()+calcPropTotal() }
+function countAllInv(){ return ESTATES.reduce((s,e)=>s+e.investments.length,0) }
+
+// ══ NAVIGATION STACK ═══════════════════════════════════
+const _stack = [];  // stores page ids
+let _current = 'home';
+
+const ROOT_PAGES = new Set(['home','investments','properties','documents','notifications','profile']);
+
+const PAGE_TITLES = {
+  home:'Home',investments:'My Investments',properties:'My Properties',
+  documents:'Documents',payments:'Payments',opportunities:'Opportunities',
+  notifications:'Notifications',profile:'Profile',
+  'estate-detail':'Investment Detail','prop-detail':'Property Detail',
+  'opp-detail':'Opportunity Detail',
+  'doc-l2':'Documents','doc-l3':'Documents','doc-l4':'Documents',
+  'opportunities':'Opportunities'
+};
+
+// Push current onto stack then show new page
+function push(pageId){
+  _stack.push(_current);
+  show(pageId);
+}
+
+// Go back via stack
+function goBack(){
+  if(_stack.length>0){
+    const prev = _stack.pop();
+    show(prev);
+  } else {
+    show('home');
+  }
+}
+
+// Show page (no stack manipulation)
+function show(pageId){
+  _current = pageId;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg = document.getElementById('page-'+pageId);
+  if(pg) pg.classList.add('active');
+  document.getElementById('tb-title').textContent = PAGE_TITLES[pageId]||pageId;
+  // Back button: hide on root pages, or on payments/opportunities when accessed directly from sidebar
+  const isRoot = ROOT_PAGES.has(pageId);
+  const noStack = _stack.length === 0;
+  const hideBack = isRoot || ((pageId==='payments'||pageId==='opportunities') && noStack);
+  document.getElementById('tb-back').classList.toggle('hidden', hideBack);
+  if(pageId==='notifications') renderNotifications();
+  if(pageId==='documents') refreshDocCounts();
+  closeSidebar();
+  window.scrollTo(0,0);
+}
+
+// Sidebar navigation — resets stack
+function navTo(pageId, el){
+  _stack.length = 0;
+  show(pageId);
+  document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  else { const s=document.querySelector(`.sb-item[data-page="${pageId}"]`); if(s) s.classList.add('active'); }
+}
+
+// ══ RENDER CARDS ════════════════════════════════════════
+
+function renderEstateCard(e){
+  const total = e.investments.reduce((s,i)=>s+i.amount,0); // calculated from investments
+  const bc = e.status==='Active'?'b-active':'b-processing';
+  return `<div class="estate-card" onclick="openEstateDetail('${e.id}')">
+    <span class="ec-arrow">›</span>
+    <div class="ec-top"><div class="ec-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><span class="badge ${bc}">${e.status}</span></div>
+    <div class="ec-name">${e.name}</div><div class="ec-loc">📍 ${e.loc}</div>
+    <div class="ec-divider"></div>
+    <div class="ec-meta">
+      <div><div class="ml">Total Invested</div><div class="mv num">${fmt(total)}</div></div>
+      <div><div class="ml">Investments</div><div class="mv num">${e.investments.length}</div></div>
+    </div>
+  </div>`;
+}
+
+function renderPropCard(p){
+  return `<div class="prop-card" onclick="openPropDetail('${p.id}')">
+    <div class="pc-stripe"></div>
+    <div class="pc-body">
+      <div class="pc-title">${p.name}</div><div class="pc-loc">📍 ${p.loc}</div>
+      <div class="pc-meta">
+        <div class="pm-item"><div class="pm-lbl">Plots Owned</div><div class="pm-val num">${p.plots} plot</div></div>
+        <div class="pm-item"><div class="pm-lbl">Amount Paid</div><div class="pm-val num">${fmt(p.amount)}</div></div>
+        <div class="pm-item"><div class="pm-lbl">Acquired</div><div class="pm-val">${p.date}</div></div>
+        <div class="pm-item"><div class="pm-lbl">Plot Size</div><div class="pm-val">${p.size}</div></div>
+      </div>
+      <span class="badge ${p.status==='Active'?'b-active':'b-processing'}">${p.status}</span>
+    </div>
+  </div>`;
+}
+
+function renderOppCard(o){
+  const btnCls = o.agri?'agri':(o.type==='Property'?'buy':'');
+  const hd = o.agri?'opp-hd agri':'opp-hd';
+  return `<div class="opp-card" onclick="openOppDetail('${o.id}')">
+    <div class="${hd}"><h3>${o.name}</h3><p>📍 ${o.loc}</p><span class="opp-tag">${o.tag}</span></div>
+    <div class="opp-body">
+      <div class="pc-meta" style="margin-bottom:10px">
+        <div class="pm-item"><div class="pm-lbl">Price</div><div class="pm-val num">${o.price}</div></div>
+        <div class="pm-item"><div class="pm-lbl">Min. Entry</div><div class="pm-val">${o.min}</div></div>
+        <div class="pm-item" style="grid-column:1/-1"><div class="pm-lbl">Availability</div><div class="pm-val">${o.avail}</div></div>
+      </div>
+      ${o.sold>0?`<div class="prog-wrap"><div class="prog-top"><span>Sold</span><span class="num">${o.sold}%</span></div><div class="prog-bar"><div class="prog-fill" style="width:${o.sold}%"></div></div></div>`:''}
+      <button class="btn-invest ${btnCls}" onclick="event.stopPropagation();${o.agri?`showToast('Interest registered! We will contact you when this launches.')`:`openOppDetail('${o.id}')`}">${o.btn}</button>
+    </div>
+  </div>`;
+}
+
+// ══ DETAIL PAGES ════════════════════════════════════════
+
+function openEstateDetail(id){
+  push('estate-detail');
+  const e = ESTATES.find(x=>x.id===id);
+  const total = e.investments.reduce((s,i)=>s+i.amount,0);
+  document.getElementById('estate-dh').innerHTML = `
+    <div class="dh-tag">Fractional Plot Investment</div>
+    <div class="dh-name">${e.name}</div><div class="dh-loc">📍 ${e.loc}</div>
+    <div class="dh-stats">
+      <div class="dh-s"><div class="dsl">Total Invested</div><div class="dsv num">${fmt(total)}</div></div>
+      <div class="dh-s"><div class="dsl">Investments</div><div class="dsv num">${e.investments.length}</div></div>
+      <div class="dh-s"><div class="dsl">Status</div><div class="dsv">${e.status}</div></div>
+    </div>`;
+  document.getElementById('estate-entries').innerHTML = e.investments.map(inv=>`
+    <div class="entry-card">
+      <div class="entry-top"><span class="entry-date">${inv.date}</span><span class="entry-pct">${inv.pct}% of a plot</span></div>
+      <div class="entry-meta">
+        <div class="em-item"><div class="eml">Amount Invested</div><div class="emv">${fmt(inv.amount)}</div></div>
+        <div class="em-item"><div class="eml">Plot Price</div><div class="emv">${fmt(inv.plotPrice)}</div></div>
+        <div class="em-item"><div class="eml">Payments Made</div><div class="emv num">${inv.payments.length}</div></div>
+      </div>
+      <div class="entry-actions">
+        <button class="btn-ghost" onclick="push('doc-l4-inv');renderDocL4_patched('investments','${e.id}','${inv.id}')">View Documents</button>
+        <button class="btn-primary" onclick="showInvPayments('${inv.id}','${e.id}')">View Payments</button>
+      </div>
+    </div>`).join('');
+}
+
+function openPropDetail(id){
+  push('prop-detail');
+  const p = PROPERTIES.find(x=>x.id===id);
+  document.getElementById('prop-dh').innerHTML = `
+    <div class="dh-tag">Full Plot Purchase</div>
+    <div class="dh-name">${p.name}</div><div class="dh-loc">📍 ${p.loc}</div>
+    <div class="dh-stats">
+      <div class="dh-s"><div class="dsl">Plots Owned</div><div class="dsv num">${p.plots}</div></div>
+      <div class="dh-s"><div class="dsl">Amount Paid</div><div class="dsv num">${fmt(p.amount)}</div></div>
+      <div class="dh-s"><div class="dsl">Plot Size</div><div class="dsv">${p.size}</div></div>
+      <div class="dh-s"><div class="dsl">Status</div><div class="dsv">${p.status}</div></div>
+    </div>`;
+  document.getElementById('prop-doc-btn').onclick = ()=>{push('prop-detail');renderDocL4('properties',id,null)};
+  document.getElementById('prop-pay-btn').onclick = ()=>{push('prop-detail');_showPropPaymentsNoStack(id)};
+}
+
+function openOppDetail(id){
+  push('opp-detail');
+  const o = OPPS.find(x=>x.id===id);
+  const hd = document.getElementById('opp-dh');
+  hd.className = 'opp-detail-hd'+(o.agri?' agri':'');
+  hd.innerHTML = `<div class="odh-tag">${o.tag}</div><div class="odh-name">${o.name}</div><div class="odh-loc">📍 ${o.loc}</div>`;
+  document.getElementById('opp-dmeta').innerHTML = `
+    <div class="pm-item"><div class="pm-lbl">Type</div><div class="pm-val">${o.type}</div></div>
+    <div class="pm-item"><div class="pm-lbl">Price</div><div class="pm-val num">${o.price}</div></div>
+    <div class="pm-item"><div class="pm-lbl">${o.priceLabel||'Details'}</div><div class="pm-val">${o.min}</div></div>
+    <div class="pm-item"><div class="pm-lbl">Availability</div><div class="pm-val">${o.avail}</div></div>`;
+  document.getElementById('opp-ddesc').innerHTML = `<h4>About this Opportunity</h4><p>${o.desc}</p>`;
+  const btnCls = o.agri?'agri':(o.type==='Property'?'buy':'');
+  const oppAction = o.agri
+    ? `showToast('Interest registered! We will contact you when this launches.')`
+    : (o.paystackLink ? `window.open('${o.paystackLink}','_blank')` : `showToast('Contact us on WhatsApp to proceed with this opportunity.')`);
+  document.getElementById('opp-dbtn').innerHTML = `<button class="btn-invest ${btnCls}" style="max-width:220px" onclick="${oppAction}">${o.btn}</button>`;
+}
+
+// ══ PAYMENTS (PER INVESTMENT / PROPERTY) ═══════════════
+
+function showInvPayments(invId, estateId){
+  push('payments');
+  const estate = ESTATES.find(e=>e.id===estateId);
+  const inv = estate.investments.find(i=>i.id===invId);
+  const pays = inv.payments;
+  const total = pays.reduce((s,p)=>s+p.amount,0);
+  const confirmed = pays.filter(p=>p.status==='Confirmed').length;
+  const processing = pays.filter(p=>p.status==='Processing').length;
+  document.getElementById('pay-ph').innerHTML = `<h2>Payments</h2><p>${estate.name} · ${inv.pct}% of a plot · ${inv.date}</p>`;
+  const ctx = document.getElementById('pay-ctx');
+  ctx.textContent = `Showing payments for this investment only: ${inv.pct}% of a plot in ${estate.name}`;
+  ctx.classList.remove('hidden');
+  document.getElementById('pay-summary').innerHTML = `
+    <div class="ps-item"><strong class="num">${fmt(total)}</strong> total</div>
+    <div class="ps-item" style="color:var(--border2)">|</div>
+    <div class="ps-item"><strong>${pays.length}</strong> payment${pays.length!==1?'s':''}</div>
+    <div class="ps-item" style="color:var(--border2)">|</div>
+    <div class="ps-item" style="color:var(--green)"><strong>${confirmed}</strong> confirmed</div>
+    ${processing?`<div class="ps-item"><strong style="color:var(--warn)">${processing}</strong> processing</div>`:''}`;
+  document.getElementById('pay-tbody').innerHTML = pays.map(p=>`
+    <tr>
+      <td>${p.date}</td>
+      <td class="amount-cell num">${fmt(p.amount)}</td>
+      <td class="pay-method">${p.method}</td>
+      <td class="mono">${p.ref}</td>
+      <td><span class="badge ${p.status==='Confirmed'?'b-confirmed':'b-processing'}">${p.status}</span></td>
+    </tr>`).join('');
+}
+
+function showPropPayments(propId){
+  push('payments');
+  const p = PROPERTIES.find(x=>x.id===propId);
+  const pays = p.payments;
+  const total = pays.reduce((s,x)=>s+x.amount,0);
+  document.getElementById('pay-ph').innerHTML = `<h2>Payments</h2><p>${p.name} · ${p.plots} plot</p>`;
+  const ctx = document.getElementById('pay-ctx');
+  ctx.textContent = `Showing payments for ${p.name} only`;
+  ctx.classList.remove('hidden');
+  document.getElementById('pay-summary').innerHTML = `
+    <div class="ps-item"><strong class="num">${fmt(total)}</strong> total</div>
+    <div class="ps-item" style="color:var(--border2)">|</div>
+    <div class="ps-item"><strong>${pays.length}</strong> payment${pays.length!==1?'s':''}</div>`;
+  document.getElementById('pay-tbody').innerHTML = pays.map(x=>`
+    <tr>
+      <td>${x.date}</td>
+      <td class="amount-cell num">${fmt(x.amount)}</td>
+      <td class="pay-method">${x.method}</td>
+      <td class="mono">${x.ref}</td>
+      <td><span class="badge ${x.status==='Confirmed'?'b-confirmed':'b-processing'}">${x.status}</span></td>
+    </tr>`).join('');
+}
+
+function showAllPayments(){
+  // Show all payments — used from sidebar Payments link
+  const rows = [];
+  ESTATES.forEach(e=>e.investments.forEach(i=>i.payments.forEach(p=>{
+    rows.push({...p, label:`${e.name} · ${i.pct}% · ${i.date}`, type:'Investment'});
+  })));
+  PROPERTIES.forEach(p=>p.payments.forEach(x=>{
+    rows.push({...x, label:p.name, type:'Property'});
+  }));
+  rows.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const total = rows.reduce((s,r)=>s+r.amount,0);
+  document.getElementById('pay-ph').innerHTML = `<h2>Payment History</h2><p>All transactions</p>`;
+  document.getElementById('pay-ctx').classList.add('hidden');
+  document.getElementById('pay-summary').innerHTML = `
+    <div class="ps-item"><strong class="num">${fmt(total)}</strong> total</div>
+    <div class="ps-item" style="color:var(--border2)">|</div>
+    <div class="ps-item"><strong>${rows.length}</strong> transactions</div>
+    <div class="ps-item" style="color:var(--border2)">|</div>
+    <div class="ps-item" style="color:var(--green)"><strong>${rows.filter(r=>r.status==='Confirmed').length}</strong> confirmed</div>
+    <div class="ps-item"><strong style="color:var(--warn)">${rows.filter(r=>r.status==='Processing').length}</strong> processing</div>`;
+  document.getElementById('pay-tbody').innerHTML = rows.map(r=>`
+    <tr>
+      <td>${r.date}</td>
+      <td class="amount-cell num">${fmt(r.amount)}</td>
+      <td class="pay-method">${r.method}</td>
+      <td class="mono">${r.ref}</td>
+      <td><span class="badge ${r.status==='Confirmed'?'b-confirmed':'b-processing'}">${r.status}</span></td>
+    </tr>`).join('');
+}
+
+// ══ DOCUMENTS (4 LEVELS) ═══════════════════════════════
+
+// No-stack variant used by notification actions (stack already pushed by clickNotif)
+function _showInvPaymentsNoStack(invId, estateId){  const estate = ESTATES.find(e=>e.id===estateId);
+  const inv = estate.investments.find(i=>i.id===invId);
+  const pays = inv.payments;
+  const total = pays.reduce((s,p)=>s+p.amount,0);
+  const confirmed = pays.filter(p=>p.status==='Confirmed').length;
+  const processing = pays.filter(p=>p.status==='Processing').length;
+  document.getElementById('pay-ph').innerHTML = `<h2>Payments</h2><p>${estate.name} · ${inv.pct}% of a plot · ${inv.date}</p>`;
+  const ctx = document.getElementById('pay-ctx');
+  ctx.textContent = `Showing payments for this investment only: ${inv.pct}% of a plot in ${estate.name}`;
+  ctx.classList.remove('hidden');
+  document.getElementById('pay-summary').innerHTML = `
+    <div class="ps-item"><strong class="num">${fmt(total)}</strong> total</div>
+    <div class="ps-item" style="color:var(--border2)">|</div>
+    <div class="ps-item"><strong>${pays.length}</strong> payment${pays.length!==1?'s':''}</div>
+    <div class="ps-item" style="color:var(--border2)">|</div>
+    <div class="ps-item" style="color:var(--green)"><strong>${confirmed}</strong> confirmed</div>
+    ${processing?`<div class="ps-item"><strong style="color:var(--warn)">${processing}</strong> processing</div>`:''}`;
+  document.getElementById('pay-tbody').innerHTML = pays.map(p=>`
+    <tr><td>${p.date}</td><td class="amount-cell num">${fmt(p.amount)}</td><td class="pay-method">${p.method}</td><td class="mono">${p.ref}</td>
+    <td><span class="badge ${p.status==='Confirmed'?'b-confirmed':'b-processing'}">${p.status}</span></td></tr>`).join('');
+  show('payments');
+}
+
+function _showPropPaymentsNoStack(propId){
+  const p = PROPERTIES.find(x=>x.id===propId);
+  const pays = p.payments;
+  const total = pays.reduce((s,x)=>s+x.amount,0);
+  document.getElementById('pay-ph').innerHTML = `<h2>Payments</h2><p>${p.name} · ${p.plots} plot</p>`;
+  const ctx = document.getElementById('pay-ctx');
+  ctx.textContent = `Showing payments for ${p.name} only`;
+  ctx.classList.remove('hidden');
+  document.getElementById('pay-summary').innerHTML = `
+    <div class="ps-item"><strong class="num">${fmt(total)}</strong> total</div>
+    <div class="ps-item" style="color:var(--border2)">|</div>
+    <div class="ps-item"><strong>${pays.length}</strong> payment${pays.length!==1?'s':''}</div>`;
+  document.getElementById('pay-tbody').innerHTML = pays.map(x=>`
+    <tr><td>${x.date}</td><td class="amount-cell num">${fmt(x.amount)}</td><td class="pay-method">${x.method}</td><td class="mono">${x.ref}</td>
+    <td><span class="badge ${x.status==='Confirmed'?'b-confirmed':'b-processing'}">${x.status}</span></td></tr>`).join('');
+  show('payments');
+}
+
+function refreshDocCounts(){
+  const invDocs = ESTATES.reduce((s,e)=>s+e.investments.reduce((ss,i)=>ss+i.docs.length,0),0);
+  const propDocs = PROPERTIES.reduce((s,p)=>s+p.docs.length,0);
+  document.getElementById('doc-inv-count').textContent = invDocs+' document'+(invDocs!==1?'s':'');
+  document.getElementById('doc-prop-count').textContent = propDocs+' document'+(propDocs!==1?'s':'');
+}
+
+function renderDocL2(cat){
+  const isInv = cat==='investments';
+  const ph = document.getElementById('doc-l2-ph');
+  ph.querySelector('h2').textContent = isInv ? 'Investment Documents' : 'Property Documents';
+  ph.querySelector('p').textContent = isInv ? 'Select an estate' : 'Select a property';
+  const list = isInv ? ESTATES : PROPERTIES;
+  document.getElementById('doc-l2-list').innerHTML = list.map(e=>{
+    const count = isInv ? e.investments.reduce((s,i)=>s+i.docs.length,0) : e.docs.length;
+    return `<div class="doc-list-card" onclick="push('doc-l2');renderDocL3('${cat}','${e.id}')">
+      <div class="doc-list-inner">
+        <div class="dli-ico ${isInv?'':'green'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div>
+        <div><div class="dli-name">${e.name}</div><div class="dli-sub">${count} document${count!==1?'s':''}</div></div>
+        <span class="dli-arr">›</span>
+      </div>
+    </div>`;
+  }).join('');
+  show('doc-l2');
+}
+
+function renderDocL3(cat, entityId){
+  const isInv = cat==='investments';
+  if(!isInv){
+    // Properties go straight to L4 — push current before showing L4
+    renderDocL4('properties', entityId, null);
+    return;
+  }
+  const estate = ESTATES.find(e=>e.id===entityId);
+  const ph = document.getElementById('doc-l3-ph');
+  ph.querySelector('h2').textContent = estate.name;
+  ph.querySelector('p').textContent = 'Select an investment';
+  document.getElementById('doc-l3-list').innerHTML = estate.investments.map(inv=>`
+    <div class="doc-list-card" onclick="push('doc-l3');renderDocL4('investments','${entityId}','${inv.id}')">
+      <div class="doc-list-inner">
+        <div class="dli-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div><div class="dli-name">${inv.pct}% of a plot — ${inv.date}</div><div class="dli-sub">${fmt(inv.amount)} · ${inv.docs.length} document${inv.docs.length!==1?'s':''}</div></div>
+        <span class="dli-arr">›</span>
+      </div>
+    </div>`).join('');
+  show('doc-l3');
+}
+
+function renderDocL4(cat, entityId, invId){
+  const isInv = cat==='investments';
+  let docs, title, sub;
+  if(isInv){
+    const estate = ESTATES.find(e=>e.id===entityId);
+    const inv = estate.investments.find(i=>i.id===invId);
+    docs = inv.docs; title = `${inv.pct}% — ${estate.name}`; sub = 'Investment documents';
+  } else {
+    const prop = PROPERTIES.find(p=>p.id===entityId);
+    docs = prop.docs; title = prop.name; sub = 'Property documents';
+  }
+  document.getElementById('doc-l4-ph').querySelector('h2').textContent = title;
+  document.getElementById('doc-l4-ph').querySelector('p').textContent = sub;
+  document.getElementById('doc-l4-list').innerHTML = docs.map(d=>{
+    const ico = isInv ? 'di-blue' : 'di-green';
+    const em = isInv ? '🧾' : '📜';
+    const btns = d.ready
+      ? d.url
+        ? `<div class="doc-btns"><button class="btn-sm btn-v" onclick="window.open('${d.url}','_blank')">View</button><a href="${d.url}" download target="_blank"><button class="btn-sm btn-d">Download</button></a></div>`
+        : `<div class="doc-btns"><button class="btn-sm btn-v" onclick="showToast('Document link not ready. Contact admin.')">View</button><button class="btn-sm btn-d" onclick="showToast('Document link not ready. Contact admin.')">Download</button></div>`
+      : `<div class="doc-btns"><button class="btn-sm btn-p">Processing</button></div>`;
+    return `<div class="doc-file-row">
+      <div class="doc-ico ${d.ready?ico:'di-gray'}">${d.ready?em:'⏳'}</div>
+      <div class="doc-info"><div class="doc-name">${d.name}</div><div class="doc-sub">${d.ready?'Uploaded '+d.date:'Processing — ready within 3 working days'}</div></div>
+      ${btns}
+    </div>`;
+  }).join('');
+  show('doc-l4');
+}
+
+// ══ NOTIFICATIONS ══════════════════════════════════════
+
+function renderNotifications(){
+  const notifs = buildLiveNotifications();
+  const unread = notifs.filter(n=>!n.read).length;
+  const badge = document.getElementById('sb-badge');
+  const dot = document.getElementById('notif-dot');
+  if(badge){ badge.textContent=unread; badge.style.display=unread>0?'':'none'; }
+  if(dot) dot.style.display=unread>0?'':'none';
+  document.getElementById('notif-list').innerHTML = notifs.map((n,i)=>
+    `<div class="notif-item ${n.read?'read':'unread'}" onclick="clickNotif(${i})">
+      <div class="ni-ico ${n.ico}">${n.em}</div>
+      <div class="ni-body"><div class="ni-title">${n.title}</div>
+      <div class="ni-desc">${n.desc}</div>
+      ${n.time?`<div class="ni-time">${n.time}</div>`:''}</div>
+      ${n.read?'':'<div class="unread-dot"></div>'}
+    </div>`).join('') || '<div style="padding:20px;color:#6E7D95;font-size:13px">No notifications yet.</div>';
+  window._NOTIFS = notifs;
+}
+
+function buildLiveNotifications(){
+  const n=[];
+  ESTATES.forEach(e=>e.investments.forEach(inv=>{
+    inv.docs.forEach(d=>{
+      if(!d.ready) n.push({read:false,ico:'ni-warn',em:'⏳',title:'Processing: '+d.name,desc:e.name+' — ready in 3 working days.',time:'Recent',action:()=>{_stack.push('notifications');renderDocL4_patched('investments',e.id,inv.id);}});
+      else n.push({read:true,ico:'ni-green',em:'📄',title:'Document Ready: '+d.name,desc:e.name+' — tap to download.',time:d.date||'',action:()=>{_stack.push('notifications');renderDocL4_patched('investments',e.id,inv.id);}});
+    });
+    inv.payments.forEach(p=>n.push({read:p.status==='Confirmed',ico:p.status==='Confirmed'?'ni-green':'ni-warn',em:'💳',title:'Payment '+p.status+': '+fmt(p.amount),desc:e.name+' — Ref: '+p.ref,time:p.date,action:()=>{_stack.push('notifications');showInvPayments(inv.id,e.id);}}));
+  }));
+  PROPERTIES.forEach(p=>{
+    p.docs.forEach(d=>{
+      if(!d.ready) n.push({read:false,ico:'ni-warn',em:'⏳',title:'Processing: '+d.name,desc:p.name+' — ready in 3 working days.',time:'Recent',action:()=>{_stack.push('notifications');renderDocL4_patched('properties',p.id,null);}});
+      else n.push({read:true,ico:'ni-green',em:'📄',title:'Document Ready: '+d.name,desc:p.name+' — tap to download.',time:d.date||'',action:()=>{_stack.push('notifications');renderDocL4_patched('properties',p.id,null);}});
+    });
+    p.payments.forEach(pay=>n.push({read:pay.status==='Confirmed',ico:pay.status==='Confirmed'?'ni-green':'ni-warn',em:'💳',title:'Payment '+pay.status+': '+fmt(pay.amount),desc:p.name+' — Ref: '+pay.ref,time:pay.date,action:()=>{_stack.push('notifications');showPropPayments(p.id);}}));
+  });
+  if(!n.length) n.push({read:true,ico:'ni-blue',em:'🎉',title:'Welcome to Orendina Realty Portal',desc:'Your account is active.',time:'',action:()=>show('home')});
+  return n;
+}
+
+function clickNotif(i){
+  const n=window._NOTIFS&&window._NOTIFS[i];
+  if(!n) return;
+  n.read=true;
+  n.action();
+}
+
+// ══ HOME RENDER ════════════════════════════════════════
+
+function renderHome(){
+  const invTotal = calcInvTotal();
+  const propTotal = calcPropTotal();
+  const grandTotal = invTotal + propTotal;
+  const totalPlots = PROPERTIES.reduce((s,p)=>s+p.plots,0);
+
+  document.getElementById('home-total-bal').textContent = fmt(grandTotal);
+  document.getElementById('home-chips').innerHTML = `
+    <div class="ah-chip"><span class="ah-chip-lbl">Investments</span><span class="ah-chip-val num">${fmt(invTotal)}</span></div>
+    <div class="ah-chip"><span class="ah-chip-lbl">Properties</span><span class="ah-chip-val">${totalPlots} plot${totalPlots!==1?'s':''}</span></div>
+    <div class="ah-chip"><span class="ah-chip-lbl">Status</span><span class="ah-chip-val chip-green">Active</span></div>`;
+
+  const invCount = countAllInv();
+  const propCount = PROPERTIES.length;
+  const docCount = ESTATES.reduce((s,e)=>s+e.investments.reduce((ss,i)=>ss+i.docs.length,0),0)+PROPERTIES.reduce((s,p)=>s+p.docs.length,0);
+  const payCount = ESTATES.reduce((s,e)=>s+e.investments.reduce((ss,i)=>ss+i.payments.filter(p=>p.status==='Confirmed').length,0),0)
+    + PROPERTIES.reduce((s,p)=>s+p.payments.filter(x=>x.status==='Confirmed').length,0);
+
+  document.getElementById('home-stats').innerHTML = `
+    <div class="sc"><div class="sc-ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="sc-lbl">Investments</div><div class="sc-val num">${invCount}</div><div class="sc-sub">Across ${ESTATES.length} estates</div></div>
+    <div class="sc"><div class="sc-ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div class="sc-lbl">Properties</div><div class="sc-val num">${propCount}</div><div class="sc-sub">${totalPlots} full plot${totalPlots!==1?'s':''}</div></div>
+    <div class="sc"><div class="sc-ico gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div><div class="sc-lbl">Documents</div><div class="sc-val num">${docCount}</div></div>
+    <div class="sc"><div class="sc-ico green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div><div class="sc-lbl">Confirmed Payments</div><div class="sc-val num">${payCount}</div></div>`;
+
+  document.getElementById('home-inv-grid').innerHTML = ESTATES.length ? ESTATES.map(renderEstateCard).join('') : empty('No investments yet');
+  document.getElementById('home-prop-grid').innerHTML = PROPERTIES.length ? PROPERTIES.map(renderPropCard).join('') : empty('No properties yet');
+  document.getElementById('home-opp-grid').innerHTML = [
+    OPPS.find(o=>o.type==='Investment'&&!o.agri),
+    OPPS.find(o=>o.type==='Property')
+  ].filter(Boolean).map(renderOppCard).join('');
+}
+
+// ══ SIDEBAR PAYMENTS (all) ═════════════════════════════
+// Override navTo for payments to show all
+const _origNavTo = navTo;
+document.querySelector('.sb-item[data-page="payments"]').addEventListener('click', e=>{
+  e.stopPropagation();
+  _stack.length=0;
+  show('payments');
+  document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector('.sb-item[data-page="payments"]').classList.add('active');
+  showAllPayments();
+});
+
+// ══ INIT ════════════════════════════════════════════════
+function init(){
+  renderHome();
+  // Investments page
+  const invTotalAmt = calcInvTotal();
+  document.getElementById('inv-stats').innerHTML = `
+    <div class="sc"><div class="sc-ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="sc-lbl">Total Invested</div><div class="sc-val num" style="font-size:16px">${fmt(invTotalAmt)}</div></div>
+    <div class="sc"><div class="sc-ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><div class="sc-lbl">Estates</div><div class="sc-val num">${ESTATES.length}</div></div>
+    <div class="sc"><div class="sc-ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg></div><div class="sc-lbl">Investments</div><div class="sc-val num">${countAllInv()}</div></div>`;
+  document.getElementById('inv-grid').innerHTML = ESTATES.map(renderEstateCard).join('');
+  document.getElementById('prop-grid').innerHTML = PROPERTIES.map(renderPropCard).join('');
+  // Split opportunities by type
+  const invOpps = OPPS.filter(o=>o.type==='Investment'||o.agri);
+  const propOpps = OPPS.filter(o=>o.type==='Property');
+  document.getElementById('opp-inv-grid').innerHTML = invOpps.map(renderOppCard).join('');
+  document.getElementById('opp-prop-grid').innerHTML = propOpps.map(renderOppCard).join('');
+  // Profile counts
+  document.getElementById('profile-inv-count').textContent = countAllInv();
+  document.getElementById('profile-prop-count').textContent = PROPERTIES.length;
+  showAllPayments();
+  renderNotifications();
+}
+init();
+
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('open'); }
+function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+// ══ SUPABASE CONFIG ══════════════════════════════════
+// EDIT: Go to Supabase Dashboard → Settings → API
+// Copy the "anon public" key (starts with eyJ...) and paste below
+const SUPABASE_URL = 'https://vumoubhczqauqtmhnmjx.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1bW91YmhjenFhdXF0bWhubWp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzMzMzgsImV4cCI6MjA5MTMwOTMzOH0.LT8XO4Swp5L_DituMXrL6YhK9cmGFZOI0Mu-yiOsPkY';
+// To get your key: supabase.com → your project → Settings → API → anon public
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let CURRENT_USER = null;
+let CURRENT_PROFILE = null;
+
+// ══ AUTH FUNCTIONS ════════════════════════════════════
+
+function aSwitch(tab){
+  document.getElementById('aform-login').classList.toggle('hidden', tab!=='login');
+  document.getElementById('aform-signup').classList.toggle('hidden', tab!=='signup');
+  document.getElementById('atab-login').classList.toggle('active', tab==='login');
+  document.getElementById('atab-signup').classList.toggle('active', tab!=='login');
+}
+
+async function doLogin(){
+  const email = document.getElementById('ain-email').value.trim();
+  const pass = document.getElementById('ain-pass').value;
+  const err = document.getElementById('aerr-login');
+  const btn = document.getElementById('abtn-login');
+  err.classList.remove('show');
+  if(!email||!pass){err.textContent='Please enter your email and password.';err.classList.add('show');return;}
+  btn.disabled=true; btn.textContent='Signing in...';
+  const {data,error} = await db.auth.signInWithPassword({email,password:pass});
+  btn.disabled=false; btn.textContent='Sign In to My Portal';
+  if(error){err.textContent=error.message;err.classList.add('show');return;}
+  await bootApp(data.user);
+}
+
+async function doSignup(){
+  const name = document.getElementById('ain-name').value.trim();
+  const phone = document.getElementById('ain-phone').value.trim();
+  const email = document.getElementById('ain-semail').value.trim();
+  const pass = document.getElementById('ain-spass').value;
+  const err = document.getElementById('aerr-signup');
+  const ok = document.getElementById('aok-signup');
+  const btn = document.getElementById('abtn-signup');
+  err.classList.remove('show'); ok.classList.remove('show');
+  if(!name||!email||!pass){err.textContent='Please fill all fields.';err.classList.add('show');return;}
+  if(pass.length<6){err.textContent='Password must be at least 6 characters.';err.classList.add('show');return;}
+  btn.disabled=true; btn.textContent='Creating account...';
+  const {data,error} = await db.auth.signUp({email,password:pass,options:{data:{full_name:name,phone}}});
+  btn.disabled=false; btn.textContent='Create My Account';
+  if(error){err.textContent=error.message;err.classList.add('show');return;}
+  if(data.user){
+    await db.from('profiles').update({full_name:name,phone}).eq('id',data.user.id);
+  }
+  ok.textContent='Account created! Check your email to confirm, then sign in.';
+  ok.classList.add('show');
+}
+
+async function doSignout(){
+  await db.auth.signOut();
+  CURRENT_USER=null; CURRENT_PROFILE=null;
+  document.getElementById('main-app').classList.remove('show');
+  document.body.style.overflow='hidden';
+  document.getElementById('auth-screen').style.display='flex';
+  // Reset nav to home
+  _stack.length=0; _current='home';
+}
+
+// ══ BOOT APP ══════════════════════════════════════════
+
+async function bootApp(user){
+  CURRENT_USER = user;
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('main-app').classList.add('show');
+  document.body.style.overflow='';
+
+  // Load profile
+  const {data:prof} = await db.from('profiles').select('*').eq('id',user.id).single();
+  CURRENT_PROFILE = prof || {};
+
+  // Load real data from Supabase
+  const [{data:invData},{data:propData},{data:payData},{data:docData},{data:oppData}] = await Promise.all([
+    db.from('properties').select('*').eq('user_id',user.id).eq('type','investment').order('date_acquired',{ascending:false}),
+    db.from('properties').select('*').eq('user_id',user.id).eq('type','property').order('date_acquired',{ascending:false}),
+    db.from('payments').select('*').eq('user_id',user.id).order('paid_at',{ascending:false}),
+    db.from('documents').select('*').eq('user_id',user.id),
+    db.from('opportunities').select('*').eq('status','Active')
+  ]);
+
+  // Build ESTATES from investment rows
+  // Each row in properties table with type=investment is one investment entry
+  // Group by estate name
+  const estateMap = {};
+  (invData||[]).forEach(row => {
+    const k = row.name || 'Unknown Estate';
+    if(!estateMap[k]){
+      estateMap[k] = {
+        id: k.toLowerCase().replace(/\s+/g,'-'),
+        name: k,
+        loc: row.location || '',
+        status: row.status || 'Active',
+        investments: []
+      };
+    }
+    // Build payments for this investment from pay table
+    const invPays = (payData||[]).filter(p=>p.property_name===row.name && p.investment_ref===row.id);
+    // Build docs for this investment from docs table
+    const invDocs = (docData||[]).filter(d=>d.property_name===row.name && (d.investment_id===row.id||!d.investment_id));
+    estateMap[k].investments.push({
+      id: row.id,
+      date: row.date_acquired ? new Date(row.date_acquired).toLocaleDateString('en-NG',{month:'short',year:'numeric'}) : '—',
+      pct: row.units || 0,
+      amount: Number(row.amount_paid||0),
+      plotPrice: Number(row.plot_price||0),
+      payments: invPays.map(p=>({
+        date: p.paid_at ? new Date(p.paid_at).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}) : '—',
+        amount: Number(p.amount||0),
+        method: p.method||'Bank Transfer',
+        ref: p.reference||'—',
+        status: p.status||'Confirmed'
+      })),
+      docs: invDocs.map(d=>({
+        name: d.doc_name,
+        date: d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}) : '—',
+        ready: d.status==='Ready',
+        url: d.doc_url||''
+      }))
+    });
+  });
+
+  // Rebuild ESTATES array (overwrite static data)
+  ESTATES.length = 0;
+  Object.values(estateMap).forEach(e=>ESTATES.push(e));
+
+  // Build PROPERTIES array from property rows
+  PROPERTIES.length = 0;
+  (propData||[]).forEach(row=>{
+    const propPays = (payData||[]).filter(p=>p.property_name===row.name && !p.investment_ref);
+    const propDocs = (docData||[]).filter(d=>d.property_name===row.name);
+    PROPERTIES.push({
+      id: row.id,
+      name: row.name,
+      loc: row.location||'',
+      plots: row.units||1,
+      amount: Number(row.amount_paid||0),
+      date: row.date_acquired ? new Date(row.date_acquired).toLocaleDateString('en-NG',{month:'short',year:'numeric'}) : '—',
+      size: row.plot_size||'—',
+      status: row.status||'Active',
+      payments: propPays.map(p=>({
+        date: p.paid_at ? new Date(p.paid_at).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}) : '—',
+        amount: Number(p.amount||0),
+        method: p.method||'Bank Transfer',
+        ref: p.reference||'—',
+        status: p.status||'Confirmed'
+      })),
+      docs: propDocs.map(d=>({
+        name: d.doc_name,
+        date: d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}) : '—',
+        ready: d.status==='Ready',
+        url: d.doc_url||''
+      }))
+    });
+  });
+
+  // Build OPPS from supabase opportunities table
+  if(oppData && oppData.length > 0){
+    OPPS.length = 0;
+    oppData.forEach(o=>{
+      const isAgri = (o.type||'').toLowerCase().includes('agri');
+      const isProp = (o.type||'').toLowerCase().includes('property')||(o.type||'').toLowerCase().includes('plot');
+      OPPS.push({
+        id: o.id,
+        name: o.name,
+        loc: o.location||'',
+        type: isProp?'Property':(isAgri?'Investment':'Investment'),
+        tag: o.type||'Investment',
+        price: o.price_per_unit?'₦'+Number(o.price_per_unit).toLocaleString('en-NG'):'TBA',
+        priceLabel: isProp?'per full plot':'per fractional unit',
+        min: isProp?'—':(o.min_entry||'10%'),
+        avail: (o.total_units||0)-(o.units_sold||0)+' '+(isProp?'plots':'units')+' left',
+        sold: o.total_units>0?Math.round(((o.units_sold||0)/o.total_units)*100):0,
+        desc: o.description||'',
+        btn: isAgri?'Register Interest':isProp?'Buy Now':'Invest Now',
+        agri: isAgri,
+        paystackLink: o.paystack_link||''
+      });
+    });
+  }
+
+  // Update sidebar user info
+  const fullName = CURRENT_PROFILE.full_name || user.email.split('@')[0];
+  const initials = fullName.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'?';
+  document.getElementById('sb-av').textContent = initials;
+  document.getElementById('sb-uname').textContent = fullName;
+  document.getElementById('sb-uid').textContent = CURRENT_PROFILE.investor_id||'—';
+  document.getElementById('home-welcome').textContent = 'Welcome back, '+fullName.split(' ')[0];
+
+  // Update profile side
+  document.getElementById('prof-av').textContent = initials;
+  document.getElementById('prof-name').textContent = fullName;
+  document.getElementById('prof-id').textContent = CURRENT_PROFILE.investor_id||'—';
+
+  // Fill profile form
+  const nameParts = fullName.split(' ');
+  document.getElementById('pf-fname').value = nameParts[0]||'';
+  document.getElementById('pf-lname').value = nameParts.slice(1).join(' ')||'';
+  document.getElementById('pf-phone').value = CURRENT_PROFILE.phone||'';
+  document.getElementById('pf-email').value = user.email||'';
+  document.getElementById('pf-nin').value = CURRENT_PROFILE.nin||'';
+  document.getElementById('pf-address').value = CURRENT_PROFILE.address||'';
+  document.getElementById('pf-kname').value = CURRENT_PROFILE.kin_name||'';
+  document.getElementById('pf-krel').value = CURRENT_PROFILE.kin_relationship||'';
+  document.getElementById('pf-kphone').value = CURRENT_PROFILE.kin_phone||'';
+  document.getElementById('pf-kemail').value = CURRENT_PROFILE.kin_email||'';
+  const kninEl = document.getElementById('pf-knin');
+  if(kninEl) kninEl.value = CURRENT_PROFILE.kin_nin||'';
+
+  // Now run original init
+  init();
+}
+
+// ══ SAVE PROFILE ══════════════════════════════════════
+async function saveProfile(){
+  if(!CURRENT_USER) return;
+  const fname = document.getElementById('pf-fname').value.trim();
+  const lname = document.getElementById('pf-lname').value.trim();
+  const fullName = (fname+' '+lname).trim();
+  const updates = {
+    full_name: fullName,
+    phone: document.getElementById('pf-phone').value.trim(),
+    nin: document.getElementById('pf-nin').value.trim(),
+    address: document.getElementById('pf-address').value.trim(),
+    kin_name: document.getElementById('pf-kname').value.trim(),
+    kin_relationship: document.getElementById('pf-krel').value.trim(),
+    kin_phone: document.getElementById('pf-kphone').value.trim(),
+    kin_email: document.getElementById('pf-kemail').value.trim(),
+    kin_nin: document.getElementById('pf-knin').value.trim()
+  };
+  const {error} = await db.from('profiles').update(updates).eq('id',CURRENT_USER.id);
+  if(error){ showToast('Error saving: '+error.message); return; }
+  CURRENT_PROFILE = {...CURRENT_PROFILE,...updates};
+  const initials = fullName.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
+  document.getElementById('sb-av').textContent = initials;
+  document.getElementById('sb-uname').textContent = fullName;
+  document.getElementById('prof-av').textContent = initials;
+  document.getElementById('prof-name').textContent = fullName;
+  showToast('Profile saved successfully ✓');
+}
+
+// ══ PATCH OPP CARD to use paystack link ══════════════
+// Override renderOppCard to use dynamic paystack link
+const _origRenderOppCard = renderOppCard;
+
+// Override document render to use real URLs
+function renderDocL4_patched(cat, entityId, invId){
+  const isInv = cat==='investments';
+  let docs, title, sub;
+  if(isInv){
+    const estate = ESTATES.find(e=>e.id===entityId);
+    if(!estate) return;
+    const inv = estate.investments.find(i=>i.id===invId);
+    if(!inv) return;
+    docs = inv.docs; title = inv.pct+'% — '+estate.name; sub = 'Investment documents';
+  } else {
+    const prop = PROPERTIES.find(p=>p.id===entityId);
+    if(!prop) return;
+    docs = prop.docs; title = prop.name; sub = 'Property documents';
+  }
+  document.getElementById('doc-l4-ph').querySelector('h2').textContent = title;
+  document.getElementById('doc-l4-ph').querySelector('p').textContent = sub;
+  if(!docs || !docs.length){
+    document.getElementById('doc-l4-list').innerHTML = '<div style="background:#FEF0DC;border:1px solid rgba(154,75,0,.15);border-radius:12px;padding:16px;font-size:13px;color:#9A4B00;font-weight:500">No documents uploaded yet. Documents are processed within 3 working days of acquisition.</div>';
+    show('doc-l4');
+    return;
+  }
+  const ico = isInv ? 'di-blue' : 'di-green';
+  const em = isInv ? '🧾' : '📜';
+  document.getElementById('doc-l4-list').innerHTML = docs.map(d=>{
+    const btns = d.ready && d.url
+      ? `<div class="doc-btns"><button class="btn-sm btn-v" onclick="window.open('${d.url}','_blank')">View</button><a href="${d.url}" download target="_blank"><button class="btn-sm btn-d">Download</button></a></div>`
+      : d.ready
+      ? `<div class="doc-btns"><button class="btn-sm btn-v" onclick="showToast('Document link not ready. Contact admin.')">View</button><button class="btn-sm btn-d" onclick="showToast('Document link not ready. Contact admin.')">Download</button></div>`
+      : `<div class="doc-btns"><button class="btn-sm btn-p">Processing</button></div>`;
+    return `<div class="doc-file-row">
+      <div class="doc-ico ${d.ready?ico:'di-gray'}">${d.ready?em:'⏳'}</div>
+      <div class="doc-info"><div class="doc-name">${d.name}</div><div class="doc-sub">${d.ready?'Uploaded '+d.date:'Processing — ready within 3 working days'}</div></div>
+      ${btns}
+    </div>`;
+  }).join('');
+  show('doc-l4');
+}
+
+// ══ TOAST ════════════════════════════════════════════
+let _toastT;
+function showToast(msg){
+  clearTimeout(_toastT);
+  let t=document.getElementById('_toast');
+  if(!t){t=document.createElement('div');t.id='_toast';t.style.cssText='position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(70px);background:#09101E;color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:500;opacity:0;transition:.25s;z-index:9999;pointer-events:none;font-family:Inter,sans-serif;white-space:nowrap';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
+  _toastT=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(70px)';},3000);
+}
+
+// ══ INIT SESSION CHECK ════════════════════════════════
+(async()=>{
+  const {data:{session}} = await db.auth.getSession();
+  if(session){
+    await bootApp(session.user);
+  }
+  // Listen for auth changes
+  db.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_IN' && session && !CURRENT_USER){
+      await bootApp(session.user);
+    }
+  });
+})();
+
+</script>
+</div><!-- end main-app -->
+</body>
+</html>
