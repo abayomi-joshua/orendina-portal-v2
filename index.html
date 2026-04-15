@@ -746,16 +746,6 @@ const OPPS = [
     btn:'Register Interest', agri:true }
 ];
 
-const NOTIFICATIONS = [
-  {id:'n1',read:false,ico:'ni-warn',em:'⏳',title:'Document Processing — Ido Phase 2',desc:'Your Certificate of Land Banking for Ido Estate Phase 2 is processing. Ready within 3 working days.',time:'Today, 9:00 AM',
-    action(){renderDocL3('investments','ido-phase2')}},
-  {id:'n2',read:false,ico:'ni-green',em:'✓',title:'Payment Confirmed — Fortune City (30%)',desc:'₦300,000 payment for Fortune City Estate (30% investment) confirmed.',time:'28 Feb 2025, 3:00 PM',
-    action(){_showInvPaymentsNoStack('fc-i2','fortune-city')}},
-  {id:'n3',read:false,ico:'ni-blue',em:'📄',title:'Documents Ready — Medichi Estate',desc:'Your Deed of Assignment and Survey Plan for Medichi Estate are now available.',time:'15 Mar 2025, 11:30 AM',
-    action(){renderDocL4('properties','medichi',null)}},
-  {id:'n4',read:true,ico:'ni-blue',em:'🎉',title:'Welcome to Orendina Realty Portal',desc:'Your investor account is active. Manage your investments and properties here.',time:'10 Jan 2025, 9:00 AM',
-    action(){show('home')}}
-];
 
 // ══ HELPERS ════════════════════════════════════════════
 const fmt = n => '₦' + Number(n).toLocaleString('en-NG');
@@ -1144,29 +1134,49 @@ function renderDocL4(cat, entityId, invId){
 // ══ NOTIFICATIONS ══════════════════════════════════════
 
 function renderNotifications(){
-  const unread = NOTIFICATIONS.filter(n=>!n.read).length;
+  const notifs = buildLiveNotifications();
+  const unread = notifs.filter(n=>!n.read).length;
   const badge = document.getElementById('sb-badge');
   const dot = document.getElementById('notif-dot');
-  if(unread===0){ if(badge) badge.remove(); if(dot) dot.remove(); }
-  else { if(badge) badge.textContent=unread; if(dot) dot.style.display=''; }
-  document.getElementById('notif-list').innerHTML = NOTIFICATIONS.map(n=>`
-    <div class="notif-item ${n.read?'read':'unread'}" id="ni-${n.id}" onclick="clickNotif('${n.id}')">
+  if(badge){ badge.textContent=unread; badge.style.display=unread>0?'':'none'; }
+  if(dot) dot.style.display=unread>0?'':'none';
+  document.getElementById('notif-list').innerHTML = notifs.map((n,i)=>
+    `<div class="notif-item ${n.read?'read':'unread'}" onclick="clickNotif(${i})">
       <div class="ni-ico ${n.ico}">${n.em}</div>
-      <div class="ni-body"><div class="ni-title">${n.title}</div><div class="ni-desc">${n.desc}</div><div class="ni-time">${n.time}</div></div>
+      <div class="ni-body"><div class="ni-title">${n.title}</div>
+      <div class="ni-desc">${n.desc}</div>
+      ${n.time?`<div class="ni-time">${n.time}</div>`:''}</div>
       ${n.read?'':'<div class="unread-dot"></div>'}
-    </div>`).join('');
+    </div>`).join('') || '<div style="padding:20px;color:#6E7D95;font-size:13px">No notifications yet.</div>';
+  window._NOTIFS = notifs;
 }
 
-function clickNotif(id){
-  const n = NOTIFICATIONS.find(x=>x.id===id);
+function buildLiveNotifications(){
+  const n=[];
+  ESTATES.forEach(e=>e.investments.forEach(inv=>{
+    inv.docs.forEach(d=>{
+      if(!d.ready) n.push({read:false,ico:'ni-warn',em:'⏳',title:'Processing: '+d.name,desc:e.name+' — ready in 3 working days.',time:'Recent',action:()=>{_stack.push('notifications');renderDocL4_patched('investments',e.id,inv.id);}});
+      else n.push({read:true,ico:'ni-green',em:'📄',title:'Document Ready: '+d.name,desc:e.name+' — tap to download.',time:d.date||'',action:()=>{_stack.push('notifications');renderDocL4_patched('investments',e.id,inv.id);}});
+    });
+    inv.payments.forEach(p=>n.push({read:p.status==='Confirmed',ico:p.status==='Confirmed'?'ni-green':'ni-warn',em:'💳',title:'Payment '+p.status+': '+fmt(p.amount),desc:e.name+' — Ref: '+p.ref,time:p.date,action:()=>{_stack.push('notifications');showInvPayments(inv.id,e.id);}}));
+  }));
+  PROPERTIES.forEach(p=>{
+    p.docs.forEach(d=>{
+      if(!d.ready) n.push({read:false,ico:'ni-warn',em:'⏳',title:'Processing: '+d.name,desc:p.name+' — ready in 3 working days.',time:'Recent',action:()=>{_stack.push('notifications');renderDocL4_patched('properties',p.id,null);}});
+      else n.push({read:true,ico:'ni-green',em:'📄',title:'Document Ready: '+d.name,desc:p.name+' — tap to download.',time:d.date||'',action:()=>{_stack.push('notifications');renderDocL4_patched('properties',p.id,null);}});
+    });
+    p.payments.forEach(pay=>n.push({read:pay.status==='Confirmed',ico:pay.status==='Confirmed'?'ni-green':'ni-warn',em:'💳',title:'Payment '+pay.status+': '+fmt(pay.amount),desc:p.name+' — Ref: '+pay.ref,time:pay.date,action:()=>{_stack.push('notifications');showPropPayments(p.id);}}));
+  });
+  if(!n.length) n.push({read:true,ico:'ni-blue',em:'🎉',title:'Welcome to Orendina Realty Portal',desc:'Your account is active.',time:'',action:()=>show('home')});
+  return n;
+}
+
+function clickNotif(i){
+  const n=window._NOTIFS&&window._NOTIFS[i];
   if(!n) return;
-  n.read = true;
-  // Push notifications page onto stack FIRST so back always returns here
-  _stack.push('notifications');
+  n.read=true;
   n.action();
-  renderNotifications(); // re-render badge/dot counts after marking read
 }
-
 // ══ HOME RENDER ════════════════════════════════════════
 
 function renderHome(){
