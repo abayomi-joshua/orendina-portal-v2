@@ -1673,12 +1673,12 @@ async function doForgotPassword(){
       await bootApp(session.user);
     }
   });
+    function goToOpportunities() {
+    navTo('opportunities', null);
+  }
 })();
-
 </script>
-  function goToOpportunities() {
-  navTo('opportunities', null);
-}
+
 </div><!-- end main-app -->
 <!-- ── LOCK SCREEN (shown after 15 min inactivity) ── -->
 <div id="lock-screen">
