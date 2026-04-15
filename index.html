@@ -30,6 +30,23 @@
 .auth-ok2{background:#E8F5E8;color:#005F02;border-radius:8px;padding:10px 12px;font-size:12px;font-weight:500;display:none;font-family:'Inter',sans-serif}
 .auth-ok2.show{display:block}
 .auth-note2{font-size:11px;color:#6E7D95;text-align:center;margin-top:6px;line-height:1.6;font-family:'Inter',sans-serif}
+
+/* ── LOCK SCREEN ── */
+#lock-screen{display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#090D1B 0%,#1A05A2 100%);align-items:center;justify-content:center;padding:20px}
+#lock-screen.show{display:flex}
+.lock-box{background:#fff;border-radius:20px;padding:36px 32px;width:100%;max-width:380px;box-shadow:0 24px 60px rgba(0,0,0,.35);text-align:center}
+.lock-av{width:64px;height:64px;border-radius:50%;background:#1A05A2;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;margin:0 auto 14px;font-family:'Inter',sans-serif}
+.lock-name{font-size:16px;font-weight:700;color:#09101E;font-family:'Inter',sans-serif;margin-bottom:4px}
+.lock-sub{font-size:12px;color:#6E7D95;font-family:'Inter',sans-serif;margin-bottom:22px;line-height:1.5}
+.lock-err{background:#FDEAEA;color:#A51B1B;border-radius:8px;padding:10px 12px;font-size:12px;font-weight:500;display:none;font-family:'Inter',sans-serif;margin-bottom:12px}
+.lock-err.show{display:block}
+.lock-input{width:100%;padding:11px 13px;border:1.5px solid #E8EDF4;border-radius:8px;font-size:14px;color:#09101E;outline:none;font-family:'Inter',sans-serif;margin-bottom:12px;box-sizing:border-box}
+.lock-input:focus{border-color:#1A05A2;box-shadow:0 0 0 3px rgba(26,5,162,.07)}
+.lock-btn{width:100%;background:#1A05A2;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:.15s;margin-bottom:10px}
+.lock-btn:hover{background:#2510C8}
+.lock-btn:disabled{opacity:.6;cursor:not-allowed}
+.lock-forgot{font-size:12px;color:#1A05A2;cursor:pointer;font-family:'Inter',sans-serif;background:none;border:none;text-decoration:underline;margin-top:4px}
+.lock-forgot:hover{color:#2510C8}
 #main-app{display:none}
 #main-app.show{display:flex}
 </style>
@@ -346,6 +363,10 @@ tr:hover td{background:#FAFBFD}
       <div class="afg"><label>Email Address</label><input type="email" id="ain-email" placeholder="your@email.com"></div>
       <div class="afg"><label>Password</label><input type="password" id="ain-pass" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <button class="auth-submit" id="abtn-login" onclick="doLogin()">Sign In to My Portal</button>
+      <div style="text-align:center;margin-top:8px">
+        <button class="lock-forgot" onclick="doForgotPassword()">Forgot Password?</button>
+      </div>
+      <div class="auth-ok2" id="reset-ok" style="margin-top:8px">Password reset email sent! Check your inbox.</div>
       <div class="auth-note2">Your investments, documents and payments are securely stored.</div>
     </div>
     <!-- SIGNUP -->
@@ -391,7 +412,7 @@ tr:hover td{background:#FAFBFD}
     <div class="sb-item" data-page="profile" onclick="navTo('profile',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</div>
   </nav>
   <div class="sb-foot">
-    <a href="https://wa.me/2347017181362" target="_blank">
+    <a href="https://wa.me/2348000000000" target="_blank">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       WhatsApp Support
     </a>
@@ -725,6 +746,16 @@ const OPPS = [
     btn:'Register Interest', agri:true }
 ];
 
+const NOTIFICATIONS = [
+  {id:'n1',read:false,ico:'ni-warn',em:'⏳',title:'Document Processing — Ido Phase 2',desc:'Your Certificate of Land Banking for Ido Estate Phase 2 is processing. Ready within 3 working days.',time:'Today, 9:00 AM',
+    action(){renderDocL3('investments','ido-phase2')}},
+  {id:'n2',read:false,ico:'ni-green',em:'✓',title:'Payment Confirmed — Fortune City (30%)',desc:'₦300,000 payment for Fortune City Estate (30% investment) confirmed.',time:'28 Feb 2025, 3:00 PM',
+    action(){_showInvPaymentsNoStack('fc-i2','fortune-city')}},
+  {id:'n3',read:false,ico:'ni-blue',em:'📄',title:'Documents Ready — Medichi Estate',desc:'Your Deed of Assignment and Survey Plan for Medichi Estate are now available.',time:'15 Mar 2025, 11:30 AM',
+    action(){renderDocL4('properties','medichi',null)}},
+  {id:'n4',read:true,ico:'ni-blue',em:'🎉',title:'Welcome to Orendina Realty Portal',desc:'Your investor account is active. Manage your investments and properties here.',time:'10 Jan 2025, 9:00 AM',
+    action(){show('home')}}
+];
 
 // ══ HELPERS ════════════════════════════════════════════
 const fmt = n => '₦' + Number(n).toLocaleString('en-NG');
@@ -840,7 +871,7 @@ function renderOppCard(o){
         <div class="pm-item" style="grid-column:1/-1"><div class="pm-lbl">Availability</div><div class="pm-val">${o.avail}</div></div>
       </div>
       ${o.sold>0?`<div class="prog-wrap"><div class="prog-top"><span>Sold</span><span class="num">${o.sold}%</span></div><div class="prog-bar"><div class="prog-fill" style="width:${o.sold}%"></div></div></div>`:''}
-      <button class="btn-invest ${btnCls}" onclick="event.stopPropagation();${o.agri?`showToast('Interest registered! We will contact you when this launches.')`:`openOppDetail('${o.id}')`}">${o.btn}</button>
+      <button class="btn-invest ${btnCls}" onclick="event.stopPropagation();${o.agri?`alert('Interest registered!')`:`openOppDetail('${o.id}')`}">${o.btn}</button>
     </div>
   </div>`;
 }
@@ -903,10 +934,7 @@ function openOppDetail(id){
     <div class="pm-item"><div class="pm-lbl">Availability</div><div class="pm-val">${o.avail}</div></div>`;
   document.getElementById('opp-ddesc').innerHTML = `<h4>About this Opportunity</h4><p>${o.desc}</p>`;
   const btnCls = o.agri?'agri':(o.type==='Property'?'buy':'');
-  const oppAction = o.agri
-    ? `showToast('Interest registered! We will contact you when this launches.')`
-    : (o.paystackLink ? `window.open('${o.paystackLink}','_blank')` : `showToast('Contact us on WhatsApp to proceed with this opportunity.')`);
-  document.getElementById('opp-dbtn').innerHTML = `<button class="btn-invest ${btnCls}" style="max-width:220px" onclick="${oppAction}">${o.btn}</button>`;
+  document.getElementById('opp-dbtn').innerHTML = `<button class="btn-invest ${btnCls}" style="max-width:220px" onclick="alert('${o.agri?'Interest registered!':'You will be redirected to the payment page.'}')">${o.btn}</button>`;
 }
 
 // ══ PAYMENTS (PER INVESTMENT / PROPERTY) ═══════════════
@@ -1102,9 +1130,7 @@ function renderDocL4(cat, entityId, invId){
     const ico = isInv ? 'di-blue' : 'di-green';
     const em = isInv ? '🧾' : '📜';
     const btns = d.ready
-      ? d.url
-        ? `<div class="doc-btns"><button class="btn-sm btn-v" onclick="window.open('${d.url}','_blank')">View</button><a href="${d.url}" download target="_blank"><button class="btn-sm btn-d">Download</button></a></div>`
-        : `<div class="doc-btns"><button class="btn-sm btn-v" onclick="showToast('Document link not ready. Contact admin.')">View</button><button class="btn-sm btn-d" onclick="showToast('Document link not ready. Contact admin.')">Download</button></div>`
+      ? `<div class="doc-btns"><button class="btn-sm btn-v" onclick="alert('Opening...')">View</button><button class="btn-sm btn-d" onclick="alert('Downloading...')">Download</button></div>`
       : `<div class="doc-btns"><button class="btn-sm btn-p">Processing</button></div>`;
     return `<div class="doc-file-row">
       <div class="doc-ico ${d.ready?ico:'di-gray'}">${d.ready?em:'⏳'}</div>
@@ -1118,48 +1144,27 @@ function renderDocL4(cat, entityId, invId){
 // ══ NOTIFICATIONS ══════════════════════════════════════
 
 function renderNotifications(){
-  const notifs = buildLiveNotifications();
-  const unread = notifs.filter(n=>!n.read).length;
+  const unread = NOTIFICATIONS.filter(n=>!n.read).length;
   const badge = document.getElementById('sb-badge');
   const dot = document.getElementById('notif-dot');
-  if(badge){ badge.textContent=unread; badge.style.display=unread>0?'':'none'; }
-  if(dot) dot.style.display=unread>0?'':'none';
-  document.getElementById('notif-list').innerHTML = notifs.map((n,i)=>
-    `<div class="notif-item ${n.read?'read':'unread'}" onclick="clickNotif(${i})">
+  if(unread===0){ if(badge) badge.remove(); if(dot) dot.remove(); }
+  else { if(badge) badge.textContent=unread; if(dot) dot.style.display=''; }
+  document.getElementById('notif-list').innerHTML = NOTIFICATIONS.map(n=>`
+    <div class="notif-item ${n.read?'read':'unread'}" id="ni-${n.id}" onclick="clickNotif('${n.id}')">
       <div class="ni-ico ${n.ico}">${n.em}</div>
-      <div class="ni-body"><div class="ni-title">${n.title}</div>
-      <div class="ni-desc">${n.desc}</div>
-      ${n.time?`<div class="ni-time">${n.time}</div>`:''}</div>
+      <div class="ni-body"><div class="ni-title">${n.title}</div><div class="ni-desc">${n.desc}</div><div class="ni-time">${n.time}</div></div>
       ${n.read?'':'<div class="unread-dot"></div>'}
-    </div>`).join('') || '<div style="padding:20px;color:#6E7D95;font-size:13px">No notifications yet.</div>';
-  window._NOTIFS = notifs;
+    </div>`).join('');
 }
 
-function buildLiveNotifications(){
-  const n=[];
-  ESTATES.forEach(e=>e.investments.forEach(inv=>{
-    inv.docs.forEach(d=>{
-      if(!d.ready) n.push({read:false,ico:'ni-warn',em:'⏳',title:'Processing: '+d.name,desc:e.name+' — ready in 3 working days.',time:'Recent',action:()=>{_stack.push('notifications');renderDocL4_patched('investments',e.id,inv.id);}});
-      else n.push({read:true,ico:'ni-green',em:'📄',title:'Document Ready: '+d.name,desc:e.name+' — tap to download.',time:d.date||'',action:()=>{_stack.push('notifications');renderDocL4_patched('investments',e.id,inv.id);}});
-    });
-    inv.payments.forEach(p=>n.push({read:p.status==='Confirmed',ico:p.status==='Confirmed'?'ni-green':'ni-warn',em:'💳',title:'Payment '+p.status+': '+fmt(p.amount),desc:e.name+' — Ref: '+p.ref,time:p.date,action:()=>{_stack.push('notifications');showInvPayments(inv.id,e.id);}}));
-  }));
-  PROPERTIES.forEach(p=>{
-    p.docs.forEach(d=>{
-      if(!d.ready) n.push({read:false,ico:'ni-warn',em:'⏳',title:'Processing: '+d.name,desc:p.name+' — ready in 3 working days.',time:'Recent',action:()=>{_stack.push('notifications');renderDocL4_patched('properties',p.id,null);}});
-      else n.push({read:true,ico:'ni-green',em:'📄',title:'Document Ready: '+d.name,desc:p.name+' — tap to download.',time:d.date||'',action:()=>{_stack.push('notifications');renderDocL4_patched('properties',p.id,null);}});
-    });
-    p.payments.forEach(pay=>n.push({read:pay.status==='Confirmed',ico:pay.status==='Confirmed'?'ni-green':'ni-warn',em:'💳',title:'Payment '+pay.status+': '+fmt(pay.amount),desc:p.name+' — Ref: '+pay.ref,time:pay.date,action:()=>{_stack.push('notifications');showPropPayments(p.id);}}));
-  });
-  if(!n.length) n.push({read:true,ico:'ni-blue',em:'🎉',title:'Welcome to Orendina Realty Portal',desc:'Your account is active.',time:'',action:()=>show('home')});
-  return n;
-}
-
-function clickNotif(i){
-  const n=window._NOTIFS&&window._NOTIFS[i];
+function clickNotif(id){
+  const n = NOTIFICATIONS.find(x=>x.id===id);
   if(!n) return;
-  n.read=true;
+  n.read = true;
+  // Push notifications page onto stack FIRST so back always returns here
+  _stack.push('notifications');
   n.action();
+  renderNotifications(); // re-render badge/dot counts after marking read
 }
 
 // ══ HOME RENDER ════════════════════════════════════════
@@ -1448,10 +1453,9 @@ async function bootApp(user){
   document.getElementById('pf-krel').value = CURRENT_PROFILE.kin_relationship||'';
   document.getElementById('pf-kphone').value = CURRENT_PROFILE.kin_phone||'';
   document.getElementById('pf-kemail').value = CURRENT_PROFILE.kin_email||'';
-  const kninEl = document.getElementById('pf-knin');
-  if(kninEl) kninEl.value = CURRENT_PROFILE.kin_nin||'';
 
   // Now run original init
+  resetLockTimer(); // start the 15-min inactivity timer
   init();
 }
 
@@ -1464,23 +1468,21 @@ async function saveProfile(){
   const updates = {
     full_name: fullName,
     phone: document.getElementById('pf-phone').value.trim(),
-    nin: document.getElementById('pf-nin').value.trim(),
     address: document.getElementById('pf-address').value.trim(),
     kin_name: document.getElementById('pf-kname').value.trim(),
     kin_relationship: document.getElementById('pf-krel').value.trim(),
     kin_phone: document.getElementById('pf-kphone').value.trim(),
-    kin_email: document.getElementById('pf-kemail').value.trim(),
-    kin_nin: document.getElementById('pf-knin').value.trim()
+    kin_email: document.getElementById('pf-kemail').value.trim()
   };
   const {error} = await db.from('profiles').update(updates).eq('id',CURRENT_USER.id);
-  if(error){ showToast('Error saving: '+error.message); return; }
+  if(error){ alert('Error saving profile: '+error.message); return; }
   CURRENT_PROFILE = {...CURRENT_PROFILE,...updates};
   const initials = fullName.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
   document.getElementById('sb-av').textContent = initials;
   document.getElementById('sb-uname').textContent = fullName;
   document.getElementById('prof-av').textContent = initials;
   document.getElementById('prof-name').textContent = fullName;
-  showToast('Profile saved successfully ✓');
+  alert('Profile saved successfully!');
 }
 
 // ══ PATCH OPP CARD to use paystack link ══════════════
@@ -1515,7 +1517,7 @@ function renderDocL4_patched(cat, entityId, invId){
     const btns = d.ready && d.url
       ? `<div class="doc-btns"><button class="btn-sm btn-v" onclick="window.open('${d.url}','_blank')">View</button><a href="${d.url}" download target="_blank"><button class="btn-sm btn-d">Download</button></a></div>`
       : d.ready
-      ? `<div class="doc-btns"><button class="btn-sm btn-v" onclick="showToast('Document link not ready. Contact admin.')">View</button><button class="btn-sm btn-d" onclick="showToast('Document link not ready. Contact admin.')">Download</button></div>`
+      ? `<div class="doc-btns"><button class="btn-sm btn-v" onclick="alert('Opening...')">View</button><button class="btn-sm btn-d" onclick="alert('Downloading...')">Download</button></div>`
       : `<div class="doc-btns"><button class="btn-sm btn-p">Processing</button></div>`;
     return `<div class="doc-file-row">
       <div class="doc-ico ${d.ready?ico:'di-gray'}">${d.ready?em:'⏳'}</div>
@@ -1526,14 +1528,119 @@ function renderDocL4_patched(cat, entityId, invId){
   show('doc-l4');
 }
 
-// ══ TOAST ════════════════════════════════════════════
-let _toastT;
-function showToast(msg){
-  clearTimeout(_toastT);
-  let t=document.getElementById('_toast');
-  if(!t){t=document.createElement('div');t.id='_toast';t.style.cssText='position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(70px);background:#09101E;color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:500;opacity:0;transition:.25s;z-index:9999;pointer-events:none;font-family:Inter,sans-serif;white-space:nowrap';document.body.appendChild(t);}
-  t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
-  _toastT=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(70px)';},3000);
+// ══ AUTO-LOCK (15 min inactivity) ════════════════════
+const LOCK_AFTER_MS = 15 * 60 * 1000; // 15 minutes
+let _lockTimer = null;
+let _isLocked = false;
+
+function resetLockTimer(){
+  if(!CURRENT_USER || _isLocked) return;
+  clearTimeout(_lockTimer);
+  _lockTimer = setTimeout(lockPortal, LOCK_AFTER_MS);
+}
+
+function lockPortal(){
+  if(!CURRENT_USER) return;
+  _isLocked = true;
+  clearTimeout(_lockTimer);
+  // Populate lock screen with user info
+  const name = CURRENT_PROFILE && CURRENT_PROFILE.full_name
+    ? CURRENT_PROFILE.full_name
+    : CURRENT_USER.email.split('@')[0];
+  const ini = name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'?';
+  document.getElementById('lock-av').textContent = ini;
+  document.getElementById('lock-name').textContent = name;
+  document.getElementById('lock-pass').value = '';
+  document.getElementById('lock-err').classList.remove('show');
+  document.getElementById('lock-screen').classList.add('show');
+  document.getElementById('lock-pass').focus();
+}
+
+async function doUnlock(){
+  const pass = document.getElementById('lock-pass').value;
+  const err  = document.getElementById('lock-err');
+  const btn  = document.getElementById('lock-btn');
+  err.classList.remove('show');
+  if(!pass){ err.textContent='Please enter your password.'; err.classList.add('show'); return; }
+  btn.disabled=true; btn.textContent='Checking...';
+  // Re-authenticate with Supabase using stored email + entered password
+  const {error} = await db.auth.signInWithPassword({
+    email: CURRENT_USER.email,
+    password: pass
+  });
+  btn.disabled=false; btn.textContent='Unlock Portal';
+  if(error){
+    err.textContent='Incorrect password. Please try again.';
+    err.classList.add('show');
+    document.getElementById('lock-pass').value='';
+    document.getElementById('lock-pass').focus();
+    return;
+  }
+  // Unlocked successfully
+  _isLocked = false;
+  document.getElementById('lock-screen').classList.remove('show');
+  resetLockTimer();
+}
+
+// Detect user activity — reset the timer on any interaction
+['mousedown','mousemove','keydown','touchstart','scroll','click'].forEach(evt=>{
+  document.addEventListener(evt, resetLockTimer, {passive:true});
+});
+
+// Lock when tab/app goes to background (phone minimize or switch tab)
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden){
+    // Start a 15-min countdown from when they left
+    clearTimeout(_lockTimer);
+    if(CURRENT_USER && !_isLocked){
+      _lockTimer = setTimeout(lockPortal, LOCK_AFTER_MS);
+    }
+  } else {
+    // They came back — if timer already fired, portal is locked
+    // If not, reset the timer
+    if(!_isLocked && CURRENT_USER) resetLockTimer();
+  }
+});
+
+// ══ FORGOT PASSWORD ═══════════════════════════════════
+async function doForgotPassword(){
+  // Get email — from lock screen use stored email, from login screen ask user
+  let email = '';
+  if(CURRENT_USER){
+    email = CURRENT_USER.email;
+  } else {
+    email = (document.getElementById('ain-email')||{value:''}).value.trim();
+    if(!email){
+      const inp = document.getElementById('ain-email');
+      if(inp) inp.focus();
+      alert('Please enter your email address first, then click Forgot Password.');
+      return;
+    }
+  }
+  // NOTE: Password reset emails require your Site URL to be set in Supabase.
+  // Go to: Supabase > Authentication > URL Configuration > Site URL
+  // Set it to your Netlify URL e.g. https://your-portal.netlify.app
+  const {error} = await db.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + window.location.pathname
+  });
+  if(error){
+    alert('Could not send reset email: '+error.message);
+    return;
+  }
+  // Show success message
+  if(CURRENT_USER){
+    // On lock screen — show a temporary message
+    const err = document.getElementById('lock-err');
+    err.style.background='#E8F5E8'; err.style.color='#005F02';
+    err.textContent='Password reset email sent to '+email+'. Check your inbox.';
+    err.classList.add('show');
+    setTimeout(()=>{ err.classList.remove('show'); err.style.background=''; err.style.color=''; }, 5000);
+  } else {
+    // On login screen
+    const ok = document.getElementById('reset-ok');
+    if(ok) ok.classList.add('show');
+    setTimeout(()=>{ if(ok) ok.classList.remove('show'); }, 6000);
+  }
 }
 
 // ══ INIT SESSION CHECK ════════════════════════════════
@@ -1552,5 +1659,19 @@ function showToast(msg){
 
 </script>
 </div><!-- end main-app -->
+<!-- ── LOCK SCREEN (shown after 15 min inactivity) ── -->
+<div id="lock-screen">
+  <div class="lock-box">
+    <div class="lock-av" id="lock-av">?</div>
+    <div class="lock-name" id="lock-name">Welcome back</div>
+    <div class="lock-sub">Your session was locked for security.<br>Enter your password to continue.</div>
+    <div class="lock-err" id="lock-err"></div>
+    <input class="lock-input" type="password" id="lock-pass" placeholder="Enter your password"
+      onkeydown="if(event.key==='Enter')doUnlock()">
+    <button class="lock-btn" id="lock-btn" onclick="doUnlock()">Unlock Portal</button>
+    <div><button class="lock-forgot" onclick="doForgotPassword()">Forgot Password?</button></div>
+  </div>
+</div>
+
 </body>
 </html>
