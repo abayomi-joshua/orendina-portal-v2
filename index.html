@@ -440,19 +440,21 @@ tr:hover td{background:#FAFBFD}
   </header>
 
   <!-- HOME -->
-    <!-- ASSETS HEADER - Improved with Add Asset button -->
-    <!-- ASSETS HEADER -->
-    <div class="assets-hd">
-      <div class="ah-inner">
-        <div class="ah-welcome" id="home-welcome">Welcome back</div>
-        <div class="ah-lbl">Total Assets Value</div>
-        <div class="ah-bal num" id="home-total-bal">₦0</div>
-        <div class="ah-chips" id="home-chips"></div>
-      </div>
-    </div>
-        <div class="ah-chips" id="home-chips" style="margin-top:18px;"></div>
-      </div>
-    </div>
+  <div class="page active" id="page-home">
+    <div class="assets-hd"><div class="ah-inner">
+      <div style="position:absolute;top:20px;right:20px;">
+ <button onclick="goToOpportunities()" 
+  style="background:#fff;color:#1A05A2;border:none;border-radius:20px;
+  padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;
+  box-shadow:0 4px 10px rgba(0,0,0,0.15);display:flex;align-items:center;gap:6px;">
+  + Add Asset
+</button>
+</div>
+      <div class="ah-welcome" id="home-welcome">Welcome back</div>
+      <div class="ah-lbl">Total Assets Value</div>
+      <div class="ah-bal num" id="home-total-bal">₦0</div>
+      <div class="ah-chips" id="home-chips"></div>
+    </div></div>
     <div class="stats-row" id="home-stats"></div>
     <div class="sec-hd"><h3>My Investments</h3><button class="sec-link" onclick="navTo('investments',null)">View all →</button></div>
     <div class="estate-grid" id="home-inv-grid"></div>
